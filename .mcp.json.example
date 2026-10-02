@@ -1,0 +1,33 @@
+{
+  "//": "EJEMPLO. Copiar a .mcp.json (ignorado por git) y completar. Nunca pegar tokens reales en este archivo de ejemplo. Guia de cada credencial en docs/MCP.md.",
+
+  "mcpServers": {
+    "supabase": {
+      "//": "Modo CUENTA (sin project_ref): permite crear proyectos. Al abrirlo Claude Code pide iniciar sesion en Supabase (OAuth). Para limitarlo a un proyecto: https://mcp.supabase.com/mcp?project_ref=<ref>",
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp"
+    },
+
+    "coolify": {
+      "//": "MCP comunitario con escritura (crear apps, variables, deploy). El MCP oficial de Coolify v4 es de solo lectura. Verificar el nombre del paquete en el repo elegido (p. ej. github.com/stumason/coolify-mcp o github.com/forsonny/Coolify-MCP-Server-for-Claude-Code). Sin MCP, deploy-coolify usa la REST API con curl.",
+      "command": "npx",
+      "args": ["-y", "coolify-mcp"],
+      "env": {
+        "COOLIFY_BASE_URL": "https://coolify.tu-dominio.com",
+        "COOLIFY_ACCESS_TOKEN": "${COOLIFY_TOKEN}"
+      }
+    },
+
+    "playwright": {
+      "//": "Navegar la instancia para capturas y pruebas manuales (skill playwright-cli).",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    },
+
+    "next-devtools": {
+      "//": "Diagnostico de Next.js en desarrollo local.",
+      "command": "npx",
+      "args": ["-y", "next-devtools-mcp@latest"]
+    }
+  }
+}

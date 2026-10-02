@@ -1,0 +1,107 @@
+---
+name: deploy-coolify
+description: |
+  Despliega una instancia nueva de Builder CRM de principio a fin: proyecto Supabase,
+  migraciones, primer admin, aplicacion en Coolify (Dockerfile) con sus variables, deploy,
+  health check y datos demo. Activar cuando el usuario dice: despliega, deploy, subilo a
+  Coolify, levanta la instancia, ponlo en produccion, crea el proyecto de Supabase.
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+---
+
+# Desplegar en Coolify
+
+> Instancia a desplegar: $ARGUMENTS
+
+Resultado: `https://<dominio>/api/health` responde `{ "ok": true, ... }`, se puede
+iniciar sesion con la cuenta admin creada, y la demo esta cargada.
+
+## 0. Lo que hace falta (pedirlo junto, una sola vez)
+
+| Credencial | Donde se obtiene | Para que |
+|---|---|---|
+| **Dominio** con registro A al VPS | DNS del cliente | `APP_BASE_URL` y el dominio de la app |
+| **Coolify** URL + API token (scope de escritura) | Coolify -> Keys & Tokens -> API tokens | crear la app, variables y deploy |
+| **Supabase** Personal Access Token (o un proyecto ya creado) | supabase.com/dashboard/account/tokens | crear el proyecto y leer sus claves |
+| **OpenRouter** API key (opcional) | openrouter.ai -> Keys | el agente |
+| **Zernio** (opcional, despues) | zernio.com -> Settings -> API Keys | canales |
+
+Genera tu mismo los secretos que no vienen de un proveedor:
+`openssl rand -hex 32` para `AGENT_WORKER_SECRET` y `LEADS_WEBHOOK_SECRET`,
+`npx web-push generate-vapid-keys` para las VAPID. La contrasena del admin demo:
+`openssl rand -base64 12`.
+
+Nunca pegues secretos en el chat de vuelta, en el repo ni en `.mcp.json`.
+
+## 1. Supabase
+
+Con el MCP de Supabase en **modo cuenta** (sin `project_ref`): `list_organizations`,
+`get_cost`/`confirm_cost`, `create_project` (region cercana al cliente, contrasena de
+base generada). Espera a que el proyecto este activo. Si el miembro ya tiene un
+proyecto, usa ese.
+
+Obtener: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+(`get_publishable_keys` / `get_project_url`), `SUPABASE_SERVICE_ROLE_KEY` (dashboard
+-> Settings -> API; no lo expone el MCP por diseno: pedirlo), `DATABASE_URL` (Connect
+-> Transaction pooler, puerto 6543) y `DIRECT_URL` (Session/direct, 5432, para
+migraciones).
+
+## 2. Migraciones y primer admin (desde la maquina del miembro)
+
+```bash
+DATABASE_URL='<pooler>' DIRECT_URL='<directo>' npm run db:migrar
+NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... DATABASE_URL=... \
+  npm run admin:crear -- --email admin@<cliente>.com --password '<generada>' --nombre "Admin"
+```
+
+Alternativa: `apply_migration` del MCP con el contenido de cada archivo de
+`supabase/migrations/` y `modules/<activo>/migrations/`, en orden (y registrar en
+`_migraciones` para que el runner no los repita). Verifica con
+`get_advisors(security)`: no debe haber tablas sin RLS.
+
+## 3. Coolify
+
+Dos caminos: el **MCP** de Coolify si esta configurado (ver `docs/MCP.md`; el oficial
+de Coolify v4 es de solo lectura) o la **REST API** con `curl`
+(`COOLIFY_URL`, `COOLIFY_TOKEN`; verificar rutas contra la version instalada en
+`<COOLIFY_URL>/docs/api`):
+
+1. **Proyecto y servidor**: `GET /api/v1/projects`, `GET /api/v1/servers` -> uuids.
+2. **Aplicacion desde repositorio** (el repo del cliente, publico o con deploy key):
+   `POST /api/v1/applications/public` con `project_uuid`, `server_uuid`,
+   `environment_name` (production), `git_repository`, `git_branch` (main),
+   `build_pack: "dockerfile"`, `ports_exposes: "3000"`, `domains: "https://<dominio>"`,
+   `instant_deploy: false`.
+3. **Variables** (`POST /api/v1/applications/<uuid>/envs/bulk`):
+   - Build args (marcar `is_build_time: true`): `NEXT_PUBLIC_SUPABASE_URL`,
+     `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL`,
+     `NEXT_PUBLIC_VAPID_PUBLIC_KEY`.
+   - Runtime: `DATABASE_URL`, `DIRECT_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
+     `APP_BASE_URL`, `AGENT_WORKER_SECRET`, `LEADS_WEBHOOK_SECRET`,
+     `OPENROUTER_API_KEY`, `AGENT_MODEL` (opcional), `VAPID_PRIVATE_KEY`,
+     `VAPID_SUBJECT`, y las de Zernio/S3 si ya existen. Lista completa y explicada en
+     `.env.example`.
+4. **Deploy**: `POST /api/v1/deploy?uuid=<uuid>`; sigue `GET /api/v1/deployments/<id>`
+   hasta `finished`. Las migraciones corren solas al arrancar (entrypoint).
+5. **Health**: `curl https://<dominio>/api/health` -> `ok: true` con `version`. Si
+   responde 503 `env_invalida`, el cuerpo lista que variable falta.
+
+## 4. Datos demo y cierre
+
+```bash
+AGENT_WORKER_SECRET='<el mismo de Coolify>' node scripts/seed-demo.mjs --url https://<dominio>
+```
+
+Luego invoca `probar-instancia`. Reporta: URL, credenciales demo (una sola vez),
+proyecto Supabase (ref), app de Coolify (uuid), y que quedo pendiente (Zernio, logo
+real, dominio de correo).
+
+## Diagnostico rapido
+
+- Build falla por `NEXT_PUBLIC_*`: no estaban marcadas como build args.
+- Health 503 `db_unavailable`: `DATABASE_URL` incorrecta o el proyecto Supabase
+  pausado. 503 `config_invalida`: `config/cliente.ts` no pasa la validacion (el
+  detalle esta en el cuerpo).
+- Migraciones no corren: el contenedor arranca con `SKIP_MIGRATIONS=true`, o
+  `DIRECT_URL` apunta al pooler de transacciones (usar el directo).
+- `/login` redirige en bucle: `NEXT_PUBLIC_SUPABASE_URL` del build no coincide con
+  el proyecto.

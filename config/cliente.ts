@@ -1,0 +1,71 @@
+import { definirConfig } from "@/lib/config/schema";
+import modulos from "./modulos.json";
+
+/**
+ * CONFIGURACION DEL CLIENTE — zona del cliente, no del nucleo.
+ *
+ * Todo lo que distingue a esta instancia vive aqui: marca, pipeline, campos del
+ * contacto, agente y modulos activos. Cambiar este archivo (y los assets de
+ * public/marca/) es la unica forma prevista de personalizar el CRM; el nucleo (src/)
+ * no se toca. El esquema completo esta en src/lib/config/schema.ts.
+ *
+ * Para una plantilla de nicho: importar la plantilla y extenderla, por ejemplo
+ *   import { plantillaInmobiliaria } from "./plantillas/inmobiliaria";
+ *   export default definirConfig({ ...plantillaInmobiliaria, marca: { ... } });
+ */
+export default definirConfig({
+  marca: {
+    nombre: "Builder CRM",
+    nombreCorto: "Builder",
+    descripcion: "Bandeja unificada de WhatsApp, Instagram y Messenger con agente de IA.",
+    logo: "/marca/logo.png",
+    icono: "/marca/icono.png",
+    colorPrimario: "#2E4A47",
+    colorSidebar: "#0F1419",
+  },
+
+  idioma: "es",
+  moneda: "USD",
+
+  roles: {
+    etiquetaAsesor: "Asesor",
+  },
+
+  pipeline: {
+    nombre: "Ventas",
+    etapas: [
+      { clave: "nuevo", nombre: "Nuevo lead", color: "#64748b" },
+      { clave: "contactado", nombre: "Contactado", color: "#2563eb" },
+      { clave: "calificado", nombre: "Calificado", color: "#8b5cf6" },
+      { clave: "propuesta", nombre: "Propuesta", color: "#f59e0b" },
+      { clave: "negociacion", nombre: "Negociacion", color: "#ea580c" },
+      { clave: "ganado", nombre: "Cerrado ganado", color: "#16a34a", ganada: true },
+      { clave: "perdido", nombre: "Cerrado perdido", color: "#dc2626", perdida: true },
+    ],
+  },
+
+  contacto: {
+    // Campos propios del negocio. Ejemplo:
+    // { clave: "presupuesto", etiqueta: "Presupuesto", tipo: "numero", enTabla: true,
+    //   agente: { descripcion: "presupuesto maximo del cliente" } },
+    campos: [],
+  },
+
+  agente: {
+    nombre: "Asistente",
+  },
+
+  modulos: {
+    nucleo: {
+      automatizaciones: true,
+      actividades: true,
+      plantillas: true,
+      push: true,
+      reportes: true,
+      simulador: true,
+    },
+    // Carpetas de modules/ activas en esta instancia: se editan en config/modulos.json
+    // (lo leen tambien el runner de migraciones y el generador del registro).
+    activos: modulos.activos,
+  },
+});

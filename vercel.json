@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      "path": "/api/agent/process",
+      "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/webhooks/zernio",
+      "schedule": "15 5 * * *"
+    },
+    {
+      "path": "/api/automations/process",
+      "schedule": "30 5 * * *"
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+# Dependencias
+/node_modules
+/.pnp
+.pnp.*
+
+# Next.js
+/.next/
+/out/
+/build
+*.tsbuildinfo
+next-env.d.ts
+
+# Entorno y secretos (NUNCA al control de versiones)
+.env*
+!.env.example
+*.pem
+*.key
+
+# MCP real con credenciales. Se versiona solo .mcp.json.example
+.mcp.json
+
+# Vercel
+.vercel
+
+# Drizzle: artefactos locales de drizzle-kit (las migraciones viven en supabase/migrations)
+/drizzle/
+
+# Logs y temporales
+*.log
+npm-debug.log*
+yarn-debug.log*
+.pnpm-debug.log*
+/coverage
+/scratch/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.bak
+
+# Claude Code: estado local de la sesion
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+.playwright-mcp/
+
+# Restos locales del proyecto original (bloqueados por OneDrive, no forman parte del repo)
+/_archive/
+/backend/
+
+# SQLite local heredado de auto-crm (no se usa; la base es Supabase)
+/data/

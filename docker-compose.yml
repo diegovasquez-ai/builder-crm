@@ -1,0 +1,31 @@
+# Builder CRM - docker compose (la base de datos y el auth son Supabase, no van aqui).
+#
+#   cp .env.example .env   # completar
+#   docker compose up -d --build
+#   curl http://localhost:3000/api/health
+#
+# En Coolify se puede desplegar este compose o directamente el Dockerfile; en los dos
+# casos Coolify pone el proxy HTTPS delante. Para un VPS sin Coolify, poner un reverse
+# proxy (Caddy, Traefik, nginx) apuntando al puerto 3000.
+services:
+  app:
+    build:
+      context: .
+      args:
+        SOURCE_COMMIT: ${SOURCE_COMMIT:-}
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+        NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${NEXT_PUBLIC_VAPID_PUBLIC_KEY:-}
+    image: builder-crm:local
+    env_file:
+      - .env
+    ports:
+      - "${PORT:-3000}:3000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/api/health"]
+      interval: 15s
+      timeout: 5s
+      start_period: 60s
+      retries: 5

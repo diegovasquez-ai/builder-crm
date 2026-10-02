@@ -1,0 +1,186 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-heading: var(--font-heading);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-foreground-muted: var(--sidebar-foreground-muted);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+}
+
+/*
+  Builder CRM - paleta base (config/cliente.ts la pisa en runtime)
+  Filosofia 60/30/10:
+    60% Blanco #FFFFFF (lienzo limpio, mensajeria estilo GHL/Intercom)
+    30% Navy #0A1628 (texto, sidebar, headings)
+    10% Verde teal base #2E4A47 (CTAs y acciones primarias, color del logo)
+  Light = blanco puro, sidebar negro permanente, teal en CTAs.
+*/
+
+:root {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-heading: 'DM Sans', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Surfaces */
+  --background: #EEF1F6;
+  --foreground: #0A1628;
+  --card: #FFFFFF;
+  --card-foreground: #0A1628;
+  --popover: #FFFFFF;
+  --popover-foreground: #0A1628;
+
+  /* Primary = verde teal base (CTAs por defecto en shadcn) */
+  --primary: #2E4A47;
+  --primary-foreground: #FFFFFF;
+
+  /* Secondary = zinc claro */
+  --secondary: #F4F4F5;
+  --secondary-foreground: #0A1628;
+
+  /* Muted = zinc claro (un toque mas fresco para diferenciar columnas) */
+  --muted: #E8EBF1;
+  --muted-foreground: #52525B;
+
+  /* Accent = teal suave */
+  --accent: #ECF3F2;
+  --accent-foreground: #1A332F;
+
+  --destructive: #DC2626;
+  --destructive-foreground: #FFFFFF;
+
+  --border: #D7DBE3;
+  --input: #D7DBE3;
+  --ring: #2E4A47;
+
+  /* Charts: brand-aligned */
+  --chart-1: #2E4A47;
+  --chart-2: #0A1628;
+  --chart-3: #6FA29D;
+  --chart-4: #1F9B73;
+  --chart-5: #1E3A5F;
+
+  --radius: 0.75rem;
+
+  /* Sidebar = negro neutro permanente (estilo Attio/SHARP) */
+  --sidebar: #0F1419;
+  --sidebar-foreground: #E8EDF5;
+  --sidebar-foreground-muted: rgba(232, 237, 245, 0.55);
+  --sidebar-primary: #6FA29D;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: rgba(111, 162, 157, 0.14);
+  --sidebar-accent-foreground: #ECF3F2;
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-ring: #6FA29D;
+
+  --success: #1F9B73;
+  --success-foreground: #FFFFFF;
+  --warning: #D97706;
+  --warning-foreground: #FFFFFF;
+
+  /* Elevation scale (navy-tinted) */
+  --shadow-xs: 0 1px 2px rgba(10, 22, 40, 0.04);
+  --shadow-sm: 0 1px 2px rgba(10, 22, 40, 0.05), 0 1px 3px rgba(10, 22, 40, 0.06);
+  --shadow-md: 0 2px 4px rgba(10, 22, 40, 0.04), 0 4px 12px rgba(10, 22, 40, 0.08);
+  --shadow-lg: 0 4px 8px rgba(10, 22, 40, 0.04), 0 12px 28px rgba(10, 22, 40, 0.12);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  html {
+    @apply font-sans;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.01em;
+  }
+  *:focus-visible {
+    outline: 2px solid #2E4A47;
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: rgba(46, 74, 71, 0.30);
+    color: #0A1628;
+  }
+  /* Scrollbar fina estilo Silicon Valley */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 8px;
+    border: 2px solid var(--background);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+  }
+}
+
+@layer utilities {
+  .transition-base {
+    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .surface-card {
+    border-radius: 1rem;
+    border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+    background-color: var(--card);
+    box-shadow: var(--shadow-sm);
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+}
