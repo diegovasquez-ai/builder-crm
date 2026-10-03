@@ -17,11 +17,12 @@ export default definirConfig({
   marca: {
     nombre: "Builder CRM",
     nombreCorto: "Builder",
-    descripcion: "Bandeja unificada de WhatsApp, Instagram y Messenger con agente de IA.",
+    descripcion: "El CRM multicanal con agente de IA de la comunidad IA Builder Lab.",
     logo: "/marca/logo.png",
     icono: "/marca/icono.png",
-    colorPrimario: "#2E4A47",
-    colorSidebar: "#0F1419",
+    // Medidos del logo de IA Builder Lab: el cian del anillo sobre el carbon del fondo.
+    colorPrimario: "#3CF5F5",
+    colorSidebar: "#171E21",
   },
 
   idioma: "es",

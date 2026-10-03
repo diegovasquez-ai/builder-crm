@@ -131,7 +131,19 @@ try {
   const { res, json } = await getJson("/manifest.webmanifest");
   if (!res.ok || !json?.name) fallo("Marca (manifest)", `HTTP ${res.status}`);
   else if (marcaEsperada && json.name !== marcaEsperada) fallo("Marca (manifest)", `esperaba "${marcaEsperada}", hay "${json.name}"`);
-  else ok("Marca (manifest)", json.name);
+  else {
+    ok("Marca (manifest)", json.name);
+    // La plantilla viene con la marca de IA Builder Lab. Para una instancia de cliente
+    // eso hay que cambiarlo en config/cliente.ts, y olvidarselo no da ningun error:
+    // simplemente el cliente ve el logo de la comunidad. Por eso se avisa.
+    if (!marcaEsperada && json.name === "Builder CRM") {
+      resultados.push({
+        check: "Marca propia del cliente",
+        estado: "INFO",
+        detalle: "sigue la marca de la plantilla; si la instancia es para un cliente, cambiala en config/cliente.ts y corre pwa:icons",
+      });
+    }
+  }
 } catch (err) {
   fallo("Marca (manifest)", err.message);
 }

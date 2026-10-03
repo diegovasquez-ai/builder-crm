@@ -4,6 +4,29 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 1.1.0 — 2026-10-03
+
+### Actualizar desde 1.0.3
+
+Trae esta version y vuelve a desplegar. Si ya pusiste la marca de tu cliente en
+`config/cliente.ts` y en `public/marca/`, el merge te va a marcar conflicto en esos
+archivos: **gana tu version**, como dice [ACTUALIZAR.md](ACTUALIZAR.md). No hay
+migraciones.
+
+### Cambiado
+
+- **La plantilla viene con la marca de IA Builder Lab**: el logo de la comunidad y sus
+  colores, medidos del propio logo, con el cian `#3CF5F5` en las acciones primarias y
+  el carbon `#171E21` en el panel lateral y la barra del movil. Antes el valor por
+  defecto era un verde generico. Para un cliente se cambia donde siempre, en la zona del
+  cliente, y nada del nucleo se toca.
+
+### Agregado
+
+- La autoverificacion avisa cuando una instancia **sigue con la marca de la plantilla**.
+  No es un fallo, porque para una demo esta bien, pero entregarle a un cliente un CRM
+  con el logo de la comunidad no da ningun error por si solo y conviene verlo antes.
+
 ## 1.0.3 — 2026-10-03
 
 ### Actualizar desde 1.0.2
