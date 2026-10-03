@@ -129,7 +129,7 @@ export const deals = pgTable("deals", {
     .references(() => pipelineStages.id),
   contactId: text("contact_id")
     .notNull()
-    .references(() => contacts.id),
+    .references(() => contacts.id, { onDelete: "cascade" }),
   expectedClose: timestamp("expected_close", { withTimezone: true }),
   probability: integer("probability").notNull().default(0),
   notes: text("notes"),
@@ -149,7 +149,7 @@ export const activities = pgTable("activities", {
   description: text("description").notNull(),
   contactId: text("contact_id")
     .notNull()
-    .references(() => contacts.id),
+    .references(() => contacts.id, { onDelete: "cascade" }),
   dealId: text("deal_id").references(() => deals.id),
   scheduledAt: timestamp("scheduled_at", { withTimezone: true }),
   completedAt: timestamp("completed_at", { withTimezone: true }),
@@ -170,7 +170,7 @@ export const messages = pgTable("messages", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  contactId: text("contact_id").references(() => contacts.id),
+  contactId: text("contact_id").references(() => contacts.id, { onDelete: "cascade" }),
   conversationId: text("conversation_id").references(() => conversations.id, {
     onDelete: "cascade",
   }),

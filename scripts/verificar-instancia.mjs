@@ -16,7 +16,13 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), "..");
-if (existsSync(join(raiz, ".env.local"))) {
+
+// `.env.local` se carga SOLO cuando no se pasa --url, o sea cuando se verifica la
+// instancia local. Verificando una remota seria una trampa: las credenciales de
+// Supabase del entorno local apuntan a otra base, el login falla con "Invalid login
+// credentials" y parece un problema de la instancia. Con --url hay que pasar
+// --supabase-url y --anon-key (o exportarlas en la terminal).
+if (!process.argv.includes("--url") && existsSync(join(raiz, ".env.local"))) {
   try {
     const { config } = await import("dotenv");
     config({ path: join(raiz, ".env.local") });
@@ -179,9 +185,27 @@ if (sinAgente || !estado?.agente?.configurado) {
     if (respondio) ok("El agente responde", `"${(ultimo.agente.reply ?? "").slice(0, 80)}..." (${ultimo.agente.toolCalls ?? 0} tools)`);
     else fallo("El agente responde", ultimo?.agente?.reason ?? "sin respuesta");
 
+    // Lo que se comprueba es que el agente ACTUE sobre el CRM, no que use una tool
+    // concreta: cuando mueve la etapa lo decide el prompt del cliente, no el codigo.
+    // Si no dejo ningun rastro, eso si es un fallo: significa que las tools no llegan.
     const e = ultimo?.estado;
-    if (e?.etapa) ok("La operacion entra al pipeline", `etapa: ${e.etapa}${e.campos && Object.keys(e.campos).length ? " · campos: " + Object.keys(e.campos).join(", ") : ""}`);
-    else fallo("La operacion entra al pipeline", "el contacto de prueba no tiene operacion (el prompt no llamo a mover_etapa)");
+    const rastros = [];
+    if (e?.etapa) rastros.push(`etapa: ${e.etapa}`);
+    if (e?.campos && Object.keys(e.campos).length) rastros.push(`campos: ${Object.keys(e.campos).join(", ")}`);
+    if (e?.resumen) rastros.push("resumen del lead");
+    if (e?.nombre && e.nombre !== "Simulador" && !e.nombre.startsWith("+")) rastros.push(`nombre: ${e.nombre}`);
+    if (rastros.length) {
+      ok("El agente actua sobre el CRM", rastros.join(" · "));
+      if (!e?.etapa) {
+        resultados.push({
+          check: "La operacion entra al pipeline",
+          estado: "INFO",
+          detalle: "el agente no movio la etapa en este turno; depende del prompt del cliente",
+        });
+      }
+    } else {
+      fallo("El agente actua sobre el CRM", "no dejo rastro: ni etapa, ni campos, ni resumen, ni nombre");
+    }
 
     if (cookie) {
       const lista = await getJson("/api/conversations");

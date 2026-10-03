@@ -4,6 +4,35 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 1.0.3 — 2026-10-03
+
+### Actualizar desde 1.0.2
+
+Trae esta version y vuelve a desplegar. Hay una migracion nueva y corre sola al
+arrancar el contenedor.
+
+### Arreglado
+
+- **Borrar un contacto fallaba con un 500.** Las claves ajenas de `activities`,
+  `deals` y `messages` hacia `contacts` estaban en NO ACTION, y todo contacto termina
+  teniendo actividades, porque las escriben la ingesta, el agente y las
+  automatizaciones. Es decir: el borrado chocaba siempre. La migracion
+  `20261003000000_cascada_contactos.sql` pasa esas tres a ON DELETE CASCADE buscando la
+  restriccion por su definicion, no por su nombre. Lo que debe sobrevivir al borrado no
+  se toca: `automation_runs` y `notifications` siguen en SET NULL porque son registro.
+- **La autoverificacion cargaba `.env.local` incluso para verificar una instancia
+  remota**, asi que el login se intentaba contra otro Supabase y fallaba con
+  "Invalid login credentials", que parece un problema de la instancia. Ahora ese archivo
+  se lee solo cuando no se pasa `--url`; para una instancia remota van
+  `--supabase-url` y `--anon-key`.
+
+### Cambiado
+
+- La autoverificacion comprueba que **el agente actue sobre el CRM** (etapa, campos,
+  resumen o nombre del contacto) en lugar de exigir que mueva la etapa. Cuando mover la
+  etapa lo decide el prompt de cada cliente, no el codigo, y si no dejo ningun rastro
+  sigue siendo un fallo. Si no movio la etapa, se informa sin pintar rojo.
+
 ## 1.0.2 — 2026-10-03
 
 ### Actualizar desde 1.0.1
