@@ -1,6 +1,15 @@
 import "server-only";
 import { db } from "@/db";
-import { activities, contacts, deals, messages, pipelineStages, pipelines, teamMembers } from "@/db/schema";
+import {
+  activities,
+  contacts,
+  conversations,
+  deals,
+  messages,
+  pipelineStages,
+  pipelines,
+  teamMembers,
+} from "@/db/schema";
 import { asc, eq, sql } from "drizzle-orm";
 import { camposContacto } from "@/lib/config";
 import { setDealStage } from "@/lib/deals/stage";
@@ -263,12 +272,22 @@ async function sembrarNucleo(r: ResultadoSeed) {
       .update(contacts)
       .set({ updatedAt: ultimoAt })
       .where(eq(contacts.id, contacto.id));
-    await db.execute(sql`
-      update conversations set
-        last_message_at = ${ultimoAt}, last_message_body = ${ultimo.body}, last_direction = ${ultimo.dir},
-        unread_count = ${ultimo.dir === "in" ? 1 : 0},
-        last_inbound_at = ${new Date(base + guion.map((g, idx) => (g.dir === "in" ? idx : -1)).filter((x) => x >= 0).pop()! * 7 * 60_000)}
-      where id = ${conv.id}`);
+    // Con el constructor, no con db.execute(sql``): en SQL crudo el driver no
+    // serializa objetos Date y la consulta falla antes de salir.
+    const idxUltimoEntrante = guion
+      .map((g, idx) => (g.dir === "in" ? idx : -1))
+      .filter((x) => x >= 0)
+      .pop()!;
+    await db
+      .update(conversations)
+      .set({
+        lastMessageAt: ultimoAt,
+        lastMessageBody: ultimo.body,
+        lastDirection: ultimo.dir,
+        unreadCount: ultimo.dir === "in" ? 1 : 0,
+        lastInboundAt: new Date(base + idxUltimoEntrante * 7 * 60_000),
+      })
+      .where(eq(conversations.id, conv.id));
   }
 
   // Un hilo derivado a humano, para que la bandeja muestre el estado.

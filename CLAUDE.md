@@ -114,6 +114,11 @@ URL desplegada. No se delega la prueba al miembro ni al cliente.
   IG/Messenger fuera de ventana van con `HUMAN_AGENT`; WhatsApp solo con plantilla.
 - **Pausa del agente**: por conversacion (`PATCH /api/conversations/:id/agente`);
   el contacto tiene ademas un kill-switch global. `derivar_asesor` pausa solo el hilo.
+- **Nunca pasar un `Date` dentro de `db.execute(sql\`...\`)`.** Ese camino llega al
+  driver por `unsafe()`, que no serializa fechas, y la consulta muere con
+  `ERR_INVALID_ARG_TYPE` antes de salir. En SQL crudo las fechas van como texto ISO con
+  cast (`${fecha.toISOString()}::timestamptz`); con el constructor de Drizzle se pasa el
+  `Date` tal cual, porque ahi si se conoce el tipo de la columna.
 - **El cliente de base es perezoso.** `src/db/index.ts` exporta un proxy que arma la
   conexion en el primer uso. `next build` importa cada route handler, y el build NO
   debe pedir `DATABASE_URL`: en el Dockerfile solo las `NEXT_PUBLIC_*` son build args,

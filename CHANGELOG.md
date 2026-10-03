@@ -4,6 +4,22 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 1.0.2 — 2026-10-03
+
+### Actualizar desde 1.0.1
+
+Trae esta version y vuelve a desplegar. No hay pasos manuales ni migraciones.
+
+### Arreglado
+
+- **La pagina de reportes no cargaba y el seed de demostracion se cortaba a mitad.**
+  Las dos cosas pasaban objetos `Date` como parametro dentro de SQL crudo. Por la via
+  de `db.execute(sql\`...\`)` el driver no serializa fechas: la consulta muere con
+  `ERR_INVALID_ARG_TYPE` sin llegar a Postgres. Ahora los reportes mandan las fechas
+  como texto ISO con cast a `timestamptz`, y el seed usa el constructor de Drizzle, que
+  si conoce el tipo de cada columna. Encontrado desplegando la instancia de
+  demostracion; ningun gate lo veia porque no tocan la base.
+
 ## 1.0.1 — 2026-10-03
 
 ### Actualizar desde 1.0.0

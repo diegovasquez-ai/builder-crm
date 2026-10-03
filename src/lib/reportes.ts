@@ -51,6 +51,9 @@ export async function generarReporte(member: TeamMember, dias: RangoDias): Promi
   const ahora = new Date();
   const desde = new Date(ahora.getTime() - dias * 86_400_000);
   const desdePrev = new Date(desde.getTime() - dias * 86_400_000);
+  // Como texto ISO con cast: el driver no serializa Date en SQL crudo (db.execute).
+  const desdeIso = desde.toISOString();
+  const desdePrevIso = desdePrev.toISOString();
   // Filtro de propietario sobre el alias `ct` (contacts). Vacio para el admin.
   const owner = member.role === "admin" ? sql`` : sql`and ct.owner_id = ${member.id}`;
 
@@ -58,31 +61,31 @@ export async function generarReporte(member: TeamMember, dias: RangoDias): Promi
     await Promise.all([
       db.execute(sql`
         select
-          count(*) filter (where ct.created_at >= ${desde}) as actual,
-          count(*) filter (where ct.created_at >= ${desdePrev} and ct.created_at < ${desde}) as anterior
+          count(*) filter (where ct.created_at >= ${desdeIso}::timestamptz) as actual,
+          count(*) filter (where ct.created_at >= ${desdePrevIso}::timestamptz and ct.created_at < ${desdeIso}::timestamptz) as anterior
         from contacts ct
         where ct.source <> 'simulador' ${owner}`),
       db.execute(sql`
         select
-          count(*) filter (where c.created_at >= ${desde}) as actual,
-          count(*) filter (where c.created_at >= ${desdePrev} and c.created_at < ${desde}) as anterior
+          count(*) filter (where c.created_at >= ${desdeIso}::timestamptz) as actual,
+          count(*) filter (where c.created_at >= ${desdePrevIso}::timestamptz and c.created_at < ${desdeIso}::timestamptz) as anterior
         from conversations c join contacts ct on ct.id = c.contact_id
         where ct.source <> 'simulador' ${owner}`),
       db.execute(sql`
         select
-          count(*) filter (where m.created_at >= ${desde}) as actual,
-          count(*) filter (where m.created_at >= ${desdePrev} and m.created_at < ${desde}) as anterior
+          count(*) filter (where m.created_at >= ${desdeIso}::timestamptz) as actual,
+          count(*) filter (where m.created_at >= ${desdePrevIso}::timestamptz and m.created_at < ${desdeIso}::timestamptz) as anterior
         from messages m
           join conversations c on c.id = m.conversation_id
           join contacts ct on ct.id = c.contact_id
         where m.direction = 'in' and ct.source <> 'simulador' ${owner}`),
       db.execute(sql`
         select
-          count(*) filter (where s.is_won and d.updated_at >= ${desde}) as ganadas,
-          count(*) filter (where s.is_won and d.updated_at >= ${desdePrev} and d.updated_at < ${desde}) as ganadas_prev,
-          coalesce(sum(d.value) filter (where s.is_won and d.updated_at >= ${desde}), 0) as valor,
-          coalesce(sum(d.value) filter (where s.is_won and d.updated_at >= ${desdePrev} and d.updated_at < ${desde}), 0) as valor_prev,
-          count(*) filter (where s.is_lost and d.updated_at >= ${desde}) as perdidas
+          count(*) filter (where s.is_won and d.updated_at >= ${desdeIso}::timestamptz) as ganadas,
+          count(*) filter (where s.is_won and d.updated_at >= ${desdePrevIso}::timestamptz and d.updated_at < ${desdeIso}::timestamptz) as ganadas_prev,
+          coalesce(sum(d.value) filter (where s.is_won and d.updated_at >= ${desdeIso}::timestamptz), 0) as valor,
+          coalesce(sum(d.value) filter (where s.is_won and d.updated_at >= ${desdePrevIso}::timestamptz and d.updated_at < ${desdeIso}::timestamptz), 0) as valor_prev,
+          count(*) filter (where s.is_lost and d.updated_at >= ${desdeIso}::timestamptz) as perdidas
         from deals d
           join pipeline_stages s on s.id = d.stage_id
           join contacts ct on ct.id = d.contact_id
@@ -92,12 +95,12 @@ export async function generarReporte(member: TeamMember, dias: RangoDias): Promi
         from messages m
           join conversations c on c.id = m.conversation_id
           join contacts ct on ct.id = c.contact_id
-        where m.direction = 'out' and m.created_at >= ${desde} and ct.source <> 'simulador' ${owner}
+        where m.direction = 'out' and m.created_at >= ${desdeIso}::timestamptz and ct.source <> 'simulador' ${owner}
         group by 1 order by 2 desc`),
       db.execute(sql`
         select count(*) as cantidad
         from conversations c join contacts ct on ct.id = c.contact_id
-        where c.needs_human_at >= ${desde} and ct.source <> 'simulador' ${owner}`),
+        where c.needs_human_at >= ${desdeIso}::timestamptz and ct.source <> 'simulador' ${owner}`),
       db.execute(sql`
         select avg(extract(epoch from (t.primera_salida - t.primera_entrada)) / 60) as minutos
         from (
@@ -107,19 +110,19 @@ export async function generarReporte(member: TeamMember, dias: RangoDias): Promi
           from conversations c
             join contacts ct on ct.id = c.contact_id
             join messages m on m.conversation_id = c.id
-          where c.created_at >= ${desde} and ct.source <> 'simulador' ${owner}
+          where c.created_at >= ${desdeIso}::timestamptz and ct.source <> 'simulador' ${owner}
           group by c.id
         ) t
         where t.primera_salida > t.primera_entrada`),
       db.execute(sql`
         select ct.source as fuente, count(*) as cantidad
         from contacts ct
-        where ct.created_at >= ${desde} and ct.source <> 'simulador' ${owner}
+        where ct.created_at >= ${desdeIso}::timestamptz and ct.source <> 'simulador' ${owner}
         group by 1 order by 2 desc limit 8`),
       db.execute(sql`
         select c.channel as canal, count(*) as cantidad
         from conversations c join contacts ct on ct.id = c.contact_id
-        where c.created_at >= ${desde} and ct.source <> 'simulador' ${owner}
+        where c.created_at >= ${desdeIso}::timestamptz and ct.source <> 'simulador' ${owner}
         group by 1 order by 2 desc`),
       db.execute(sql`
         select to_char(date_trunc('day', m.created_at), 'YYYY-MM-DD') as dia,
@@ -128,7 +131,7 @@ export async function generarReporte(member: TeamMember, dias: RangoDias): Promi
         from messages m
           join conversations c on c.id = m.conversation_id
           join contacts ct on ct.id = c.contact_id
-        where m.created_at >= ${desde} and ct.source <> 'simulador' ${owner}
+        where m.created_at >= ${desdeIso}::timestamptz and ct.source <> 'simulador' ${owner}
         group by 1 order by 1`),
       db.execute(sql`
         select s.name as etapa, s.color, s.is_won as ganada, s.is_lost as perdida,
@@ -194,11 +197,13 @@ export async function serieContactos(member: TeamMember, dias = 7): Promise<{ se
   const ahora = new Date();
   const desde = new Date(ahora.getTime() - dias * 86_400_000);
   const desdePrev = new Date(desde.getTime() - dias * 86_400_000);
+  // Como texto ISO con cast: el driver no serializa Date en SQL crudo (db.execute).
+  const desdePrevIso = desdePrev.toISOString();
   const owner = member.role === "admin" ? sql`` : sql`and ct.owner_id = ${member.id}`;
   const rows = (await db.execute(sql`
     select to_char(date_trunc('day', ct.created_at), 'YYYY-MM-DD') as dia, count(*) as cantidad
     from contacts ct
-    where ct.created_at >= ${desdePrev} and ct.source <> 'simulador' ${owner}
+    where ct.created_at >= ${desdePrevIso}::timestamptz and ct.source <> 'simulador' ${owner}
     group by 1`)) as unknown as Fila[];
   const map = new Map(rows.map((r) => [String(r.dia), n(r.cantidad)]));
   const serie: number[] = [];
