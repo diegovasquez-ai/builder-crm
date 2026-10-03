@@ -74,9 +74,9 @@ drop policy if exists activities_select on activities;
 create policy activities_select on activities for select to authenticated
   using (public.contacto_visible(contact_id));
 
-drop policy if exists visits_select on visits;
-create policy visits_select on visits for select to authenticated
-  using (public.contacto_visible(contact_id));
+-- Las tablas de los modulos (visitas, propiedades, ...) NO se tocan aca: cada modulo
+-- habilita su RLS y declara su politica en su propia migracion. Si el nucleo las
+-- nombrara, una instancia con los modulos apagados no podria migrar.
 
 drop policy if exists documents_select on documents;
 create policy documents_select on documents for select to authenticated
@@ -123,8 +123,6 @@ drop policy if exists pipeline_stages_select on pipeline_stages;
 create policy pipeline_stages_select on pipeline_stages for select to authenticated using (public.es_miembro());
 drop policy if exists whatsapp_templates_select on whatsapp_templates;
 create policy whatsapp_templates_select on whatsapp_templates for select to authenticated using (public.es_miembro());
-drop policy if exists properties_select on properties;
-create policy properties_select on properties for select to authenticated using (public.es_miembro());
 
 -- Configuracion y credenciales: solo admin.
 drop policy if exists crm_settings_select on crm_settings;

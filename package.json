@@ -1,6 +1,6 @@
 {
   "name": "builder-crm",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -22,7 +22,9 @@
     "db:generate": "drizzle-kit generate",
     "admin:crear": "node scripts/crear-admin.mjs",
     "modulos:registro": "node scripts/generar-registro-modulos.mjs",
-    "verificar": "node scripts/verificar-instancia.mjs"
+    "verificar": "node scripts/verificar-instancia.mjs",
+    "auth:preparar": "node scripts/preparar-auth-autoalojado.mjs",
+    "claves:supabase": "node scripts/generar-claves-supabase.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.82.0",

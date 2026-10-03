@@ -4,6 +4,33 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 1.0.1 — 2026-10-03
+
+### Actualizar desde 1.0.0
+
+Trae esta version y vuelve a desplegar. No hay pasos manuales. Si tu instancia ya
+estaba funcionando es porque tenias activos los modulos de propiedades y visitas; en ese
+caso no cambia nada para ti.
+
+### Arreglado
+
+- **Una instancia con los modulos apagados no podia migrar.** La migracion de RLS del
+  nucleo declaraba politicas sobre `visits` y `properties`, dos tablas que desde 1.0.0
+  pertenecen a los modulos de visitas y propiedades. Con `config/modulos.json` en su
+  valor por defecto, que es sin modulos, esas tablas no existen: `db:migrar` fallaba y
+  el contenedor no llegaba a arrancar. Cada modulo ya declara su propio RLS en su
+  migracion, asi que el nucleo no las nombra mas.
+
+### Agregado
+
+- **Modo de base de datos autoalojada**, para desplegar sin cuenta de Supabase:
+  `npm run claves:supabase` genera el secreto JWT y las claves anonima y de servicio;
+  `npm run auth:preparar` crea en tu Postgres los roles, el esquema `auth` y las
+  funciones `auth.uid()` y companeras que Supabase cloud trae de fabrica, con el dueno
+  que GoTrue necesita. La guia completa, con el orden de los pasos y los fallos tipicos,
+  esta en `docs/SUPABASE-EN-VPS.md`. Hacen falta dos contenedores en lugar de los 13 del
+  stack completo de Supabase, porque el CRM usa Supabase solo para autenticacion.
+
 ## 1.0.0 — 2026-10-02
 
 Primera version para la comunidad IA Builder Lab. Nace de un CRM construido para un

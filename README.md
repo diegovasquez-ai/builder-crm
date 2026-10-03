@@ -31,7 +31,8 @@ una instancia por cliente con un solo prompt.
 ## Requisitos
 
 - Node.js 22 y npm.
-- Una cuenta de **Supabase** (un proyecto por cliente; el plan gratuito alcanza).
+- Una cuenta de **Supabase** (un proyecto por cliente; el plan gratuito alcanza), o
+  tu propio Postgres mas GoTrue en el VPS (ver [`docs/SUPABASE-EN-VPS.md`](docs/SUPABASE-EN-VPS.md)).
 - Para desplegar: un VPS con **Coolify** y un dominio.
 - Opcional: **OpenRouter** (agente), **Zernio** (canales), bucket S3 (documentos).
 - **Claude Code** con el repo abierto; ver [`CLAUDE.md`](CLAUDE.md) y
@@ -114,6 +115,7 @@ docs/              MCP, agente, guia de Zernio
 | `npm run typecheck` / `lint` | gate tecnico (CI corre los dos + build) |
 | `npm run db:migrar` / `db:status` | migraciones del nucleo + modulos activos |
 | `npm run admin:crear -- --email --password` | crea o promueve un administrador |
+| `npm run claves:supabase` / `auth:preparar` | base y Auth en tu propio VPS, sin Supabase cloud |
 | `npm run seed` | datos de demostracion (`POST /api/seed/demo`) |
 | `npm run verificar -- --url ...` | autoverificacion de una instancia |
 | `npm run zernio:setup` / `zernio:webhook` / `zernio:whatsapp` | canales via Zernio (`connect:whatsapp` para Meta directo) |
