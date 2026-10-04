@@ -4,6 +4,22 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 1.2.1 — 2026-10-03
+
+### Actualizar desde 1.2.0
+
+Trae esta version y vuelve a desplegar. Si todavia no configuraste ningun proveedor
+externo, no te afecta.
+
+### Arreglado
+
+- **La vuelta del login con un proveedor externo redirigia a la direccion interna del
+  contenedor.** Detras de un proxy, el origen de la peticion es algo como
+  https://0.0.0.0:3000, asi que despues de entrar con Google el navegador terminaba en
+  una URL inalcanzable. Ahora la direccion publica sale de APP_BASE_URL, que es la
+  fuente que no se puede falsear desde fuera, y solo si falta se miran las cabeceras
+  del proxy. Encontrado probando la ruta en la instancia desplegada.
+
 ## 1.2.0 — 2026-10-03
 
 ### Actualizar desde 1.1.2
