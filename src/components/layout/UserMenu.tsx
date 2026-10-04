@@ -3,7 +3,6 @@
 import { useEffect, useState, useTransition } from "react";
 import { ChevronsUpDown, LogOut, Settings, User as UserIcon } from "lucide-react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 import { signOut } from "@/app/login/actions";
 import {
   DropdownMenu,
@@ -31,20 +30,38 @@ function initials(name: string | null, email: string | null) {
 
 export function UserMenu() {
   const [user, setUser] = useState<SessionUser | null>(null);
+  const [cargando, setCargando] = useState(true);
   const [, startTransition] = useTransition();
 
+  // Se lee del CRM, no del cliente de Supabase del navegador: el nombre y el rol que
+  // importan estan en team_members, y asi el menu no depende de que el navegador pueda
+  // hablar con el servidor de autenticacion. Pase lo que pase deja de cargar: antes,
+  // si esa llamada fallaba, el pie del menu lateral se quedaba en gris para siempre.
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) {
-        setUser({
-          email: data.user.email ?? null,
-          fullName:
-            (data.user.user_metadata?.full_name as string | undefined) ?? null,
-        });
-      }
-    });
+    let vivo = true;
+    fetch("/api/team/me")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((datos) => {
+        if (!vivo) return;
+        const miembro = datos?.member;
+        if (miembro) setUser({ email: miembro.email ?? null, fullName: miembro.name ?? null });
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (vivo) setCargando(false);
+      });
+    return () => {
+      vivo = false;
+    };
   }, []);
+
+  if (!user && !cargando) {
+    return (
+      <div className="flex items-center gap-2.5 rounded-lg px-2 py-2 text-xs text-white/50">
+        Sesion no disponible
+      </div>
+    );
+  }
 
   if (!user) {
     return (

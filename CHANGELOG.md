@@ -4,6 +4,35 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 1.2.2 — 2026-10-04
+
+### Actualizar desde 1.2.1
+
+Trae esta version y vuelve a desplegar. No hay migraciones ni pasos manuales.
+
+### Arreglado
+
+- **El pie del menu lateral se quedaba en gris para siempre.** Next hornea las
+  variables NEXT_PUBLIC durante el build, y en una instancia por cliente la URL de
+  Supabase no se conoce al compilar la imagen. Encima, la API de Coolify 4.3 no permite
+  marcar una variable como de build, asi que llegaban vacias al bundle: el cliente de
+  Supabase del navegador nacia roto y el menu de usuario nunca cargaba, sin ningun error
+  visible. Ahora el layout escribe esos dos valores publicos en un bloque JSON en tiempo
+  de ejecucion y el navegador los lee de ahi, asi que la misma imagen sirve para
+  cualquier instancia. Esto tambien era necesario para que funcionara el boton de entrar
+  con un proveedor externo.
+- El menu de usuario lee el nombre y el correo del propio CRM en vez del cliente de
+  Supabase, y si la consulta falla muestra un aviso en vez de quedarse cargando.
+
+### Cambiado
+
+- **Ajustes -> Equipo explica que ve cada rol** al elegirlo: el asesor ve solo los
+  contactos asignados a el con todo lo que cuelga de ellos, el administrador ve todo.
+  El comportamiento ya era ese; lo que faltaba era decirlo donde se decide.
+- El dialogo de alta aclara que **no se envia ningun correo**: la cuenta queda lista al
+  instante y la contrasena temporal se la pasa el administrador, o se deja vacia si esa
+  persona va a entrar con un proveedor externo.
+
 ## 1.2.1 — 2026-10-03
 
 ### Actualizar desde 1.2.0

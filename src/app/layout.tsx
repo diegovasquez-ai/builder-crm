@@ -6,6 +6,7 @@ import { NotificationChecker } from "@/components/shared/NotificationChecker";
 import { PWARegister } from "@/components/shared/PWARegister";
 import { AppShell } from "@/components/layout/AppShell";
 import { getConfig, cssVariablesMarca } from "@/lib/config";
+import { ID_CONFIG_PUBLICA, configPublicaSerializada } from "@/lib/config-publica";
 
 // Todo lo visible de la marca sale de config/cliente.ts (zona del cliente).
 export function generateMetadata(): Metadata {
@@ -46,6 +47,12 @@ export default function RootLayout({
       <head>
         {/* Colores de la marca en SSR: sin flash del color por defecto. */}
         <style dangerouslySetInnerHTML={{ __html: cssVariablesMarca() }} />
+        {/* Config publica en tiempo de ejecucion: ver src/lib/config-publica.ts. */}
+        <script
+          id={ID_CONFIG_PUBLICA}
+          type="application/json"
+          dangerouslySetInnerHTML={{ __html: configPublicaSerializada() }}
+        />
       </head>
       <body className="min-h-full bg-background">
         <TooltipProvider>

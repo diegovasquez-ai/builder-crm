@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -244,6 +245,10 @@ function AddMemberDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Agregar al equipo</DialogTitle>
+          <DialogDescription>
+            La cuenta queda lista al instante y no se envia ningun correo: pasale vos la
+            contrasena temporal, o dejala vacia si va a entrar con un proveedor externo.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4">
           <div className="space-y-2">
@@ -278,6 +283,11 @@ function AddMemberDialog({
                   <SelectItem value="admin">Administrador</SelectItem>
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">
+                {role === "asesor"
+                  ? "Ve solo los contactos asignados a el, y sus conversaciones, operaciones y actividades."
+                  : "Ve todo y gestiona equipo, canales, agente y automatizaciones."}
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="tm-pass">Contrasena temporal</Label>
