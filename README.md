@@ -23,6 +23,9 @@ una instancia por cliente con un solo prompt.
 - **Reportes** reales por periodo y **dashboard** honesto.
 - **Ajustes**: canales, agente por canal, equipo, notificaciones push.
 - **Entrar con Google** y otros proveedores, opcional: ver [`docs/GOOGLE-AUTH.md`](docs/GOOGLE-AUTH.md).
+- **Invitaciones por correo** y "olvide mi contrasena", opcional: ver
+  [`docs/CORREO.md`](docs/CORREO.md). Sin esto, el admin crea la cuenta y pasa la
+  contrasena temporal a mano, que es como viene de fabrica.
 - **Automatizaciones** (disparador -> filtros -> acciones), **PWA** instalable.
 - **Simulador**: chatear con el agente sin ningun canal conectado (demos y
   autoverificacion).

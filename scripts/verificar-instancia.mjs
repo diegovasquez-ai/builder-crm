@@ -124,10 +124,16 @@ if (!email || !password) {
             .filter(([, encendido]) => encendido === true)
             .map(([nombre]) => nombre)
             .filter((n) => n !== "email" && n !== "phone");
+          const formas = externos.length ? `email y ${externos.join(", ")}` : "solo email y contrasena";
+          // El correo lo declara la instancia (/api/health), no el proveedor: GoTrue no
+          // dice si tiene SMTP. Ver docs/CORREO.md.
+          const correo = salud?.correo
+            ? "invitaciones y recuperacion por correo: si"
+            : "invitaciones por correo: no (el admin reparte contrasenas a mano)";
           resultados.push({
             check: "Formas de entrar",
             estado: "INFO",
-            detalle: externos.length ? `email y ${externos.join(", ")}` : "solo email y contrasena",
+            detalle: `${formas}; ${correo}`,
           });
         }
       } catch {

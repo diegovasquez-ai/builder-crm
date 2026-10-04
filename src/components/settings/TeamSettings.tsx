@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { ShieldCheck, UserPlus, UserX, UserCheck } from "lucide-react";
+import { Mail, ShieldCheck, UserPlus, UserX, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { avatarBg, getInitials } from "@/lib/avatar";
+import { leerConfigPublica } from "@/lib/config-publica";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -36,6 +37,13 @@ const ROLE_ITEMS = [
   { value: "admin", label: "Administrador" },
   { value: "asesor", label: "Asesor" },
 ];
+
+const ACCESO_ITEMS = [
+  { value: "invitacion", label: "Invitacion por correo" },
+  { value: "clave", label: "Contrasena temporal" },
+];
+
+type ModoAcceso = "invitacion" | "clave";
 
 function label(m: Member) {
   return m.name?.trim() || m.email.split("@")[0];
@@ -76,6 +84,19 @@ export function TeamSettings() {
   }, [load, apply]);
 
   const isAdmin = me?.role === "admin";
+  // Si el servidor de autenticacion manda correos, el alta puede invitar; si no, la
+  // unica via es una contrasena temporal que el admin pasa a mano.
+  const { authEnviaCorreos } = leerConfigPublica();
+
+  const reenviarAcceso = async (m: Member) => {
+    const res = await fetch(`/api/team/${m.id}/acceso`, { method: "POST" });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      toast.error(body.error ?? "No se pudo reenviar");
+      return;
+    }
+    toast.success(`Enlace enviado a ${m.email}`);
+  };
 
   const update = async (id: string, patch: Partial<Member>) => {
     const res = await fetch(`/api/team/${id}`, {
@@ -165,6 +186,18 @@ export function TeamSettings() {
               </Badge>
             )}
 
+            {isAdmin && authEnviaCorreos && m.active && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => reenviarAcceso(m)}
+                className="cursor-pointer h-8 px-2"
+                title="Reenviar el acceso por correo"
+              >
+                <Mail className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            )}
+
             {isAdmin && me?.id !== m.id && (
               <Button
                 variant="ghost"
@@ -189,8 +222,34 @@ export function TeamSettings() {
           open={open}
           onClose={() => setOpen(false)}
           onCreated={async () => apply(await load())}
+          puedeInvitar={authEnviaCorreos}
         />
       )}
+    </div>
+  );
+}
+
+function CampoClaveTemporal({
+  password,
+  onChange,
+}: {
+  password: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="tm-pass">Contrasena temporal</Label>
+      <Input
+        id="tm-pass"
+        type="text"
+        value={password}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="opcional, min. 8 caracteres"
+        autoComplete="off"
+      />
+      <p className="text-xs text-muted-foreground">
+        Dejala vacia si la persona va a entrar con Google u otro proveedor.
+      </p>
     </div>
   );
 }
@@ -199,16 +258,21 @@ function AddMemberDialog({
   open,
   onClose,
   onCreated,
+  puedeInvitar,
 }: {
   open: boolean;
   onClose: () => void;
   onCreated: () => Promise<void>;
+  puedeInvitar: boolean;
 }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<Member["role"]>("asesor");
+  const [modo, setModo] = useState<ModoAcceso>("invitacion");
   const [password, setPassword] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const invitar = puedeInvitar && modo === "invitacion";
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -217,22 +281,29 @@ function AddMemberDialog({
       const res = await fetch("/api/team", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, role, password }),
+        body: JSON.stringify({ name, email, role, password, invitar }),
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) {
         toast.error(body.error ?? "No se pudo agregar");
         return;
       }
-      toast.success(
-        body.reusedAuthUser
-          ? "Agregado. Ya tenia usuario: entra con su contrasena de siempre."
-          : "Agregado. Pasale el email y la contrasena temporal."
-      );
+      if (body.avisoCorreo) {
+        toast.warning(`Agregado, pero el correo no salio: ${body.avisoCorreo}`);
+      } else if (body.correoEnviado) {
+        toast.success(`Invitado. Le llego un correo a ${email} para elegir su contrasena.`);
+      } else {
+        toast.success(
+          body.reusedAuthUser
+            ? "Agregado. Ya tenia usuario: entra con su contrasena de siempre."
+            : "Agregado. Pasale el email y la contrasena temporal."
+        );
+      }
       setName("");
       setEmail("");
       setPassword("");
       setRole("asesor");
+      setModo("invitacion");
       onClose();
       await onCreated();
     } finally {
@@ -246,8 +317,9 @@ function AddMemberDialog({
         <DialogHeader>
           <DialogTitle>Agregar al equipo</DialogTitle>
           <DialogDescription>
-            La cuenta queda lista al instante y no se envia ningun correo: pasale vos la
-            contrasena temporal, o dejala vacia si va a entrar con un proveedor externo.
+            {invitar
+              ? "Le llega un correo con un enlace para elegir su contrasena. Entra con eso, no hace falta que le pases nada."
+              : "La cuenta queda lista al instante y no se envia ningun correo: pasale vos la contrasena temporal, o dejala vacia si va a entrar con un proveedor externo."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4">
@@ -289,31 +361,49 @@ function AddMemberDialog({
                   : "Ve todo y gestiona equipo, canales, agente y automatizaciones."}
               </p>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="tm-pass">Contrasena temporal</Label>
-              <Input
-                id="tm-pass"
-                type="text"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="opcional, min. 8 caracteres"
-                autoComplete="off"
-              />
-              <p className="text-xs text-muted-foreground">
-                Dejala vacia si la persona va a entrar con Google u otro proveedor.
-              </p>
-            </div>
+            {puedeInvitar ? (
+              <div className="space-y-2">
+                <Label>Como entra</Label>
+                <Select
+                  value={modo}
+                  items={ACCESO_ITEMS}
+                  onValueChange={(v) => v && setModo(v as ModoAcceso)}
+                >
+                  <SelectTrigger className="cursor-pointer">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="invitacion">Invitacion por correo</SelectItem>
+                    <SelectItem value="clave">Contrasena temporal</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {invitar
+                    ? "Le llega el enlace a ese email y elige su propia contrasena."
+                    : "Se la pasas vos por donde quieras."}
+                </p>
+              </div>
+            ) : (
+              <CampoClaveTemporal password={password} onChange={setPassword} />
+            )}
           </div>
-          <p className="text-xs text-muted-foreground">
-            Se crea el usuario con esa contrasena. Si el email ya tenia cuenta, se
-            reutiliza y la contrasena se ignora.
-          </p>
+
+          {puedeInvitar && !invitar && (
+            <CampoClaveTemporal password={password} onChange={setPassword} />
+          )}
+
+          {!invitar && (
+            <p className="text-xs text-muted-foreground">
+              Se crea el usuario con esa contrasena. Si el email ya tenia cuenta, se
+              reutiliza y la contrasena se ignora.
+            </p>
+          )}
           <div className="flex justify-end gap-2 pt-1">
             <Button type="button" variant="outline" onClick={onClose} className="cursor-pointer">
               Cancelar
             </Button>
             <Button type="submit" disabled={saving} className="cursor-pointer">
-              {saving ? "Agregando..." : "Agregar"}
+              {saving ? "Guardando..." : invitar ? "Invitar" : "Agregar"}
             </Button>
           </div>
         </form>

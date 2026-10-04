@@ -142,6 +142,14 @@ URL desplegada. No se delega la prueba al miembro ni al cliente.
   es publico y la pagina `/signup` del CRM no puede impedir que lo llamen a mano. Las
   altas reales van por Ajustes -> Equipo, que inserta la fila con su rol, o por
   `npm run admin:crear`.
+- **Los correos de acceso los manda el proveedor, no el CRM.** Invitaciones y "olvide mi
+  contrasena" salen de GoTrue con su SMTP; el CRM solo declara la capacidad con
+  `AUTH_ENVIA_CORREOS=true` y ofrece los botones. Es un interruptor manual porque GoTrue
+  sin SMTP no falla: se traga el correo y responde 200, y la UI diria "enviado" sobre
+  nada. Los tres caminos aterrizan en `/auth/definir-clave`, que lee la sesion del
+  fragmento de la URL (por eso corre en el navegador) y limpia la barra. Las plantillas
+  las sirve el propio CRM en `/correo/*.html`, publicas porque las descarga GoTrue.
+  Ver `docs/CORREO.md`.
 - **Variables `NEXT_PUBLIC_*` se hornean en el build** (Docker: build args). El resto
   es runtime. Nada de secretos en el codigo ni en `.mcp.json` (solo `.mcp.json.example`).
 - **Datos demo** por `POST /api/seed/demo` (admin o `AGENT_WORKER_SECRET`): usan el

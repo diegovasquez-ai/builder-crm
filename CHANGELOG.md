@@ -4,6 +4,49 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 1.3.0 — 2026-10-04
+
+### Actualizar desde 1.2.2
+
+Trae esta version y vuelve a desplegar. No hay migraciones. Si no configuras SMTP, nada
+cambia: el alta sigue siendo con contrasena temporal, igual que hoy.
+
+Para encender las invitaciones por correo hay que hacer dos cosas, y las dos importan:
+poner el SMTP en el servidor de autenticacion y despues `AUTH_ENVIA_CORREOS=true` en el
+CRM. Paso a paso con Resend, Supabase cloud y las plantillas: `docs/CORREO.md`.
+
+### Agregado
+
+- **Invitaciones por correo.** En Ajustes -> Equipo, el alta ahora pregunta **como
+  entra**: una invitacion por correo, donde la persona elige su propia contrasena, o la
+  contrasena temporal de siempre. Solo aparece si la instancia declara que su servidor de
+  autenticacion manda correos.
+- **Reenviar el acceso.** Un boton por miembro, para quien perdio la contrasena o nunca
+  abrio la invitacion. No cambia nada hasta que la persona usa el enlace.
+- **"La olvidaste?" en el login**, con su pagina: pide el correo y manda un enlace. Antes
+  no habia forma de recuperar una contrasena sin que un admin la cambiara a mano.
+- **Pagina para elegir la contrasena** (`/auth/definir-clave`), donde aterrizan los tres
+  caminos. Guarda la sesion que viene en el fragmento de la URL y limpia la barra de
+  direcciones, para que el enlace no quede en el historial ni en una captura.
+- **Plantillas de correo con la marca de la instancia**, en espanol, servidas por el
+  propio CRM en `/correo/invitacion.html` y `/correo/recuperacion.html`. GoTrue las
+  descarga; en Supabase cloud se copian y se pegan en el panel. Si la URL no responde,
+  GoTrue usa su plantilla por defecto y el correo sale igual.
+- `/api/health` informa `correo: true|false`, y `npm run verificar` lo dice en la linea
+  **Formas de entrar**.
+
+### Cambiado
+
+- El dialogo de alta ya no afirma que nunca se envia un correo: lo dice segun lo que esta
+  configurado (era cierto en 1.2.2, dejo de serlo).
+- `AUTH_ENVIA_CORREOS` es un interruptor manual a proposito. GoTrue sin SMTP **no falla**:
+  usa un cliente de correo que se traga el mensaje y responde 200, asi que detectarlo
+  automaticamente era imposible y sin el interruptor la UI diria "invitacion enviada"
+  sobre un correo que nunca salio.
+- `docs/SUPABASE-EN-VPS.md` corrige un consejo: `GOTRUE_MAILER_AUTOCONFIRM` se queda en
+  `true` tambien con SMTP configurado, porque solo afecta al registro publico, que esta
+  cerrado.
+
 ## 1.2.2 — 2026-10-04
 
 ### Actualizar desde 1.2.1

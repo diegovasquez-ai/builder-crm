@@ -84,7 +84,11 @@ GOTRUE_MAILER_AUTOCONFIRM=true
 
 **`GOTRUE_MAILER_AUTOCONFIRM=true` no es opcional si no tienes SMTP.** En falso, las
 cuentas nacen sin confirmar y nadie puede entrar, sin ningun error visible en el CRM.
-Cuando pongas SMTP de verdad, lo pasas a falso.
+
+Esa variable solo afecta al registro publico, que en esta plantilla se cierra en cuanto
+existe la primera cuenta, asi que se queda en `true` tambien despues de configurar SMTP.
+Las invitaciones y la recuperacion de contrasena no dependen de ella: se encienden con
+las variables de SMTP y el interruptor del CRM, y van en [CORREO.md](CORREO.md).
 
 ## La URL del prefijo
 

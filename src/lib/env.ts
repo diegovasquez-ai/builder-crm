@@ -33,6 +33,9 @@ export const esquemaEnv = z.object({
   SUPABASE_SERVICE_ROLE_KEY: opcional,
   DIRECT_URL: opcional,
   ALLOW_PUBLIC_SIGNUP: booleano,
+  // El servidor de autenticacion tiene SMTP: habilita invitaciones por correo y
+  // "olvide mi contrasena". Ver src/lib/auth-correo.ts y docs/CORREO.md.
+  AUTH_ENVIA_CORREOS: booleano,
   AGENT_WORKER_SECRET: opcional,
   LEADS_WEBHOOK_SECRET: opcional,
   SWEEP_INTERVAL_MIN: z.preprocess(vacioComoAusente, z.coerce.number().int().min(1).optional()),

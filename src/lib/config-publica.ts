@@ -16,6 +16,17 @@
 export interface ConfigPublica {
   supabaseUrl: string;
   supabaseAnonKey: string;
+  /**
+   * El servidor de autenticacion de esta instancia manda correos: hay invitaciones por
+   * correo y "olvide mi contrasena". No es un secreto ni una credencial, es una
+   * capacidad: la UI necesita saberlo para no ofrecer un boton que no hace nada.
+   */
+  authEnviaCorreos: boolean;
+}
+
+/** `AUTH_ENVIA_CORREOS=true`. Se aceptan las formas de siempre para no pelear con ellas. */
+function leerBooleano(valor: string | undefined): boolean {
+  return ["true", "1", "si", "sí", "yes", "on"].includes((valor ?? "").trim().toLowerCase());
 }
 
 export const ID_CONFIG_PUBLICA = "builder-crm-config";
@@ -24,6 +35,7 @@ export function configPublica(): ConfigPublica {
   return {
     supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
     supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
+    authEnviaCorreos: leerBooleano(process.env.AUTH_ENVIA_CORREOS),
   };
 }
 
@@ -40,16 +52,18 @@ export function leerConfigPublica(): ConfigPublica {
       try {
         const datos = JSON.parse(bloque) as Partial<ConfigPublica>;
         if (datos.supabaseUrl && datos.supabaseAnonKey) {
-          return { supabaseUrl: datos.supabaseUrl, supabaseAnonKey: datos.supabaseAnonKey };
+          return {
+            supabaseUrl: datos.supabaseUrl,
+            supabaseAnonKey: datos.supabaseAnonKey,
+            authEnviaCorreos: datos.authEnviaCorreos === true,
+          };
         }
       } catch {
         /* sigue con las variables del build */
       }
     }
   }
-  // Vercel y desarrollo local: ahi las NEXT_PUBLIC_* si estan en el bundle.
-  return {
-    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
-    supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
-  };
+  // Vercel y desarrollo local: ahi las NEXT_PUBLIC_* si estan en el bundle. En el
+  // servidor (SSR de un componente cliente) se lee el entorno completo.
+  return configPublica();
 }

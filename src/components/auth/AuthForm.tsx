@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { signIn, signUp } from "@/app/login/actions";
 import { BotonProveedor } from "@/components/auth/BotonProveedor";
+import { leerConfigPublica } from "@/lib/config-publica";
 
 type Mode = "login" | "signup";
 
@@ -22,6 +23,9 @@ interface AuthFormProps {
 export function AuthForm({ mode, proveedores = [], errorInicial = null }: AuthFormProps) {
   const [error, setError] = useState<string | null>(errorInicial);
   const [isPending, startTransition] = useTransition();
+  // Sin correo configurado no se ofrece recuperar la contrasena: el enlace llevaria a
+  // una pagina que solo puede decir "pedisela a un administrador".
+  const { authEnviaCorreos } = leerConfigPublica();
 
   function onSubmit(formData: FormData) {
     setError(null);
@@ -83,7 +87,17 @@ export function AuthForm({ mode, proveedores = [], errorInicial = null }: AuthFo
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="password">Contrasena</Label>
+          <div className="flex items-center justify-between gap-2">
+            <Label htmlFor="password">Contrasena</Label>
+            {!isSignup && authEnviaCorreos && (
+              <Link
+                href="/auth/recuperar"
+                className="text-xs text-muted-foreground hover:text-primary"
+              >
+                La olvidaste?
+              </Link>
+            )}
+          </div>
           <Input
             id="password"
             name="password"

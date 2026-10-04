@@ -3,6 +3,7 @@ import { sql } from "drizzle-orm";
 import { APP_VERSION, BUILD_COMMIT } from "@/lib/version";
 import { envFaltantes } from "@/lib/env";
 import { erroresConfig } from "@/lib/config";
+import { correoDeAccesoActivo } from "@/lib/auth-correo";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +11,7 @@ export const dynamic = "force-dynamic";
  * Health check publico (sin sesion). Lo usan el HEALTHCHECK del contenedor, Coolify,
  * y `scripts/verificar-instancia.mjs`.
  *
- *   200 {"ok":true,"version":"1.0.0","commit":"abc1234","db":"ok"}
+ *   200 {"ok":true,"version":"1.0.0","commit":"abc1234","db":"ok","correo":false}
  *   503 {"ok":false,"error":"db_unavailable" | "env_invalida","faltan":[...]}
  *
  * Nunca expone valores de variables, solo nombres de las que faltan.
@@ -44,5 +45,13 @@ export async function GET() {
     );
   }
 
-  return NextResponse.json({ ok: true, version: APP_VERSION, commit: BUILD_COMMIT, db: "ok" });
+  // `correo` es una capacidad, no un secreto: lo usa `verificar-instancia.mjs` para
+  // decir si esta instancia puede invitar por correo o reparte contrasenas a mano.
+  return NextResponse.json({
+    ok: true,
+    version: APP_VERSION,
+    commit: BUILD_COMMIT,
+    db: "ok",
+    correo: correoDeAccesoActivo(),
+  });
 }

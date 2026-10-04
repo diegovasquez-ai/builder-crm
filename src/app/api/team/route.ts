@@ -5,6 +5,7 @@ import { sql } from "drizzle-orm";
 import { requireAdmin, requireMember } from "@/lib/api-auth";
 import { listMembers } from "@/lib/team";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { correoDeAccesoActivo, enviarEnlaceDeAcceso, invitarPorCorreo } from "@/lib/auth-correo";
 
 export const dynamic = "force-dynamic";
 
@@ -16,17 +17,23 @@ export async function GET() {
 }
 
 /**
- * Alta de un miembro (solo admin). Crea el usuario en Supabase Auth con la contrasena
- * que elige el admin y lo agrega al equipo. No pasa por el signup publico, que esta
- * cerrado.
+ * Alta de un miembro (solo admin). Crea el usuario en Supabase Auth y lo agrega al
+ * equipo. No pasa por el signup publico, que esta cerrado.
  *
- * Si el email ya tiene usuario en Auth (se registro antes), se reutiliza ese usuario.
+ * Dos formas de darle acceso, segun `invitar`:
+ *   - invitacion por correo: la persona recibe un enlace y elige su propia contrasena.
+ *     Solo si la instancia declara que el servidor de autenticacion manda correos.
+ *   - contrasena temporal (o ninguna, si entra con un proveedor externo): el admin se la
+ *     pasa por donde quiera. Es el unico camino cuando no hay correo configurado.
+ *
+ * Si el email ya tiene usuario en Auth (se registro antes, o entro con Google), se
+ * reutiliza ese usuario y la contrasena que venga se ignora.
  */
 export async function POST(request: NextRequest) {
   const auth = await requireAdmin();
   if ("response" in auth) return auth.response;
 
-  let body: { email?: string; name?: string; role?: string; password?: string };
+  let body: { email?: string; name?: string; role?: string; password?: string; invitar?: boolean };
   try {
     body = await request.json();
   } catch {
@@ -37,6 +44,9 @@ export async function POST(request: NextRequest) {
   const name = (body.name ?? "").trim();
   const role = body.role === "admin" ? "admin" : "asesor";
   const password = body.password ?? "";
+  // El interruptor manda sobre lo que pida el navegador: sin correo configurado, una
+  // "invitacion enviada" seria mentira (ver src/lib/auth-correo.ts).
+  const invitar = Boolean(body.invitar) && correoDeAccesoActivo();
 
   if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
     return NextResponse.json({ error: "Email invalido" }, { status: 400 });
@@ -48,6 +58,22 @@ export async function POST(request: NextRequest) {
   );
 
   let userId = existing?.id ?? null;
+  let correoEnviado = false;
+  let avisoCorreo: string | null = null;
+
+  if (!userId && invitar) {
+    // GoTrue crea el usuario y manda el correo en la misma transaccion: si el envio
+    // falla, no queda ningun usuario a medias y el error se puede mostrar tal cual.
+    const r = await invitarPorCorreo(email, name);
+    if ("error" in r) {
+      return NextResponse.json(
+        { error: `No se pudo enviar la invitacion: ${r.error}` },
+        { status: 502 }
+      );
+    }
+    userId = r.userId;
+    correoEnviado = true;
+  }
 
   if (!userId) {
     // La contrasena es opcional: si el equipo entra con un proveedor externo (Google y
@@ -75,6 +101,15 @@ export async function POST(request: NextRequest) {
     userId = data.user.id;
   }
 
+  // Usuario que ya existia y el admin pidio avisarle: no se puede invitar dos veces, se
+  // le manda un enlace para definir la contrasena. Si el envio falla, el alta igual
+  // vale: se avisa y el admin le pasa el acceso por otro lado.
+  if (existing && invitar) {
+    const { error } = await enviarEnlaceDeAcceso(email);
+    if (error) avisoCorreo = error;
+    else correoEnviado = true;
+  }
+
   const [row] = await db
     .insert(teamMembers)
     .values({ id: userId, email, name: name || null, role, active: true })
@@ -85,7 +120,7 @@ export async function POST(request: NextRequest) {
     .returning();
 
   return NextResponse.json(
-    { ...row, reusedAuthUser: Boolean(existing) },
+    { ...row, reusedAuthUser: Boolean(existing), correoEnviado, avisoCorreo },
     { status: 201 }
   );
 }

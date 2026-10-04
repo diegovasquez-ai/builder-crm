@@ -1,7 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/signup", "/auth", "/sin-acceso"];
+// `/correo` sirve las plantillas de los correos de acceso: las descarga el servidor de
+// autenticacion, que no tiene sesion en el CRM. Son plantillas vacias, sin datos.
+const PUBLIC_PATHS = ["/login", "/signup", "/auth", "/sin-acceso", "/correo"];
 // `/api/automations/process` es el sweeper (lo llama el cron con secreto); el resto
 // de /api/automations exige sesion.
 // Rutas con autenticacion propia (secreto del worker o admin con sesion, resuelto en
