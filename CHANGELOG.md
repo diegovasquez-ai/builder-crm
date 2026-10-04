@@ -4,6 +4,35 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 1.1.1 — 2026-10-03
+
+### Actualizar desde 1.1.0
+
+Trae esta version y vuelve a desplegar: la migracion corre sola al arrancar. **Si tu
+instancia ya estaba publicada en internet, despues entra a Ajustes -> Equipo y desactiva
+cualquier cuenta que no reconozcas**, porque el arreglo cierra la puerta hacia adelante
+pero no borra a quien haya entrado antes.
+
+### Arreglado (seguridad)
+
+- **Cualquiera podia darse de alta y entrar como asesor.** El disparador de la base
+  creaba la fila de `team_members`, activa, para todo usuario nuevo de Auth. Y el
+  registro de Supabase Auth es publico por naturaleza, porque la clave anonima viaja en
+  el navegador: bastaba con llamar a `/auth/v1/signup` a mano para saltarse la pagina
+  de registro cerrada del CRM y entrar a la bandeja y a los contactos. Comprobado contra
+  una instancia real antes y despues del arreglo.
+
+  Ahora el disparador **solo resuelve el arranque**: la primera cuenta de la instancia
+  queda como administradora y nadie mas entra solo. Un usuario de Auth sin invitacion no
+  tiene fila en `team_members` y cae en `/sin-acceso`, que es lo que la documentacion
+  decia desde el principio. El alta desde Ajustes -> Equipo no cambia: esa ruta siempre
+  inserto la fila ella misma.
+
+  Como defensa en profundidad, una vez creada la cuenta administradora conviene cerrar
+  tambien el registro en el proveedor: `GOTRUE_DISABLE_SIGNUP=true` si lo autoalojas, o
+  el interruptor de registros en el panel de Supabase cloud. `npm run admin:crear` sigue
+  funcionando igual, porque usa la clave de servicio.
+
 ## 1.1.0 — 2026-10-03
 
 ### Actualizar desde 1.0.3

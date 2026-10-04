@@ -30,10 +30,15 @@ Lo minimo que hay que entender antes de desplegar una instancia para un cliente.
 
 - Supabase Auth dice **quien** entro; `team_members` dice **que es** y si sigue
   activo. Un usuario de Auth que no esta en `team_members` no entra (`/sin-acceso`).
-- La **primera cuenta** de una instancia queda como admin (trigger en `auth.users`);
-  despues el registro publico se cierra (`ALLOW_PUBLIC_SIGNUP=true` lo reabre, solo
-  para pruebas). Las demas cuentas las crea el admin desde Ajustes -> Equipo o con
-  `npm run admin:crear`.
+- La **primera cuenta** de una instancia queda como admin (trigger en `auth.users`).
+  De ahi en adelante el trigger NO da de alta a nadie: un usuario de Auth sin fila en
+  `team_members` cae en `/sin-acceso`. Es importante que sea asi, porque el endpoint de
+  registro del proveedor es publico y la pagina `/signup` del CRM, que se cierra sola
+  (`ALLOW_PUBLIC_SIGNUP=true` la reabre, solo para pruebas), no puede evitar que lo
+  llamen directamente. Las demas cuentas las crea el admin desde Ajustes -> Equipo o con
+  `npm run admin:crear`. Como segunda barrera, una vez creado el admin conviene cerrar
+  el registro en el proveedor: `GOTRUE_DISABLE_SIGNUP=true` autoalojado, o el
+  interruptor de registros en Supabase cloud.
 - Toda ruta de datos pasa por `requireMember()` / `requireAdmin()`
   (`src/lib/api-auth.ts`) y filtra con `ownerFilter(member)`; lo que se consulta por
   id verifica `canAccessContactId`. **Lo ajeno responde 404**, no 403: no se confirma

@@ -135,8 +135,13 @@ URL desplegada. No se delega la prueba al miembro ni al cliente.
 - **Registro de modulos generado**: `config/modulos.json` ->
   `src/lib/modules/*.generated.ts` (lo escribe `next.config.ts` y `npm run
   typecheck`). Un modulo inactivo no entra al bundle; sus rutas dan 404.
-- **Primera cuenta**: el registro publico esta abierto solo mientras `team_members`
-  esta vacio (la primera es admin); despues se cierra. Sin UI: `npm run admin:crear`.
+- **Primera cuenta**: el disparador `on_auth_user_created` da de alta en
+  `team_members` SOLO a la primera cuenta de la instancia, como admin. A partir de ahi
+  nadie entra solo: un usuario de Auth sin fila en `team_members` cae en `/sin-acceso`.
+  Esto no es cosmetico, es la unica puerta: el endpoint `/auth/v1/signup` del proveedor
+  es publico y la pagina `/signup` del CRM no puede impedir que lo llamen a mano. Las
+  altas reales van por Ajustes -> Equipo, que inserta la fila con su rol, o por
+  `npm run admin:crear`.
 - **Variables `NEXT_PUBLIC_*` se hornean en el build** (Docker: build args). El resto
   es runtime. Nada de secretos en el codigo ni en `.mcp.json` (solo `.mcp.json.example`).
 - **Datos demo** por `POST /api/seed/demo` (admin o `AGENT_WORKER_SECRET`): usan el
