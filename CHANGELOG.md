@@ -4,6 +4,33 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 1.2.0 — 2026-10-03
+
+### Actualizar desde 1.1.2
+
+Trae esta version y vuelve a desplegar. No hay migraciones ni pasos manuales, y si no
+configuras ningun proveedor externo nada cambia: el login se ve igual que hoy.
+
+### Agregado
+
+- **Entrar con Google, opcional y apagado de fabrica.** Si el servidor de autenticacion
+  tiene el proveedor encendido, aparece el boton en el login y en el registro; si no, no
+  aparece. El CRM **no tiene variables propias** para esto: le pregunta al proveedor por
+  su endpoint publico `/auth/v1/settings` que tiene encendido, asi que se configura en
+  un solo lugar y no hay nada que mantener sincronizado. Sirve igual para GitHub,
+  Microsoft, Facebook y Apple.
+
+  Entrar con un proveedor **no da acceso por si solo**: quien no este en
+  `team_members` cae en `/sin-acceso`, igual que con email y contrasena. El proveedor
+  dice quien sos; el equipo dice si entras. Paso a paso, con la configuracion de Google
+  Cloud y los fallos tipicos: [docs/GOOGLE-AUTH.md](docs/GOOGLE-AUTH.md).
+
+- La **contrasena temporal es opcional** al dar de alta a alguien en Ajustes -> Equipo.
+  Si esa persona va a entrar con un proveedor externo, inventar una contrasena que nadie
+  usara solo agrega ruido.
+
+- `npm run verificar` informa las **formas de entrar** que admite la instancia.
+
 ## 1.1.2 — 2026-10-03
 
 ### Actualizar desde 1.1.1

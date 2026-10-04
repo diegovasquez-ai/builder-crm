@@ -110,6 +110,30 @@ if (!email || !password) {
       fallo("Login (Supabase Auth)", sesion.error_description ?? sesion.msg ?? `HTTP ${res.status}`);
     } else {
       ok("Login (Supabase Auth)", email);
+
+      // Que formas de entrar admite la instancia. Es informativo: el acceso real lo
+      // decide team_members, no el proveedor. Ver docs/GOOGLE-AUTH.md.
+      try {
+        const ajustes = await fetch(`${supabaseUrl.replace(/\/$/, "")}/auth/v1/settings`, {
+          headers: { apikey: anonKey },
+          signal: AbortSignal.timeout(10_000),
+        });
+        if (ajustes.ok) {
+          const datos = await ajustes.json();
+          const externos = Object.entries(datos.external ?? {})
+            .filter(([, encendido]) => encendido === true)
+            .map(([nombre]) => nombre)
+            .filter((n) => n !== "email" && n !== "phone");
+          resultados.push({
+            check: "Formas de entrar",
+            estado: "INFO",
+            detalle: externos.length ? `email y ${externos.join(", ")}` : "solo email y contrasena",
+          });
+        }
+      } catch {
+        /* informativo: si no responde, no se informa */
+      }
+
       const ref = new URL(supabaseUrl).hostname.split(".")[0];
       const valor = "base64-" + Buffer.from(JSON.stringify(sesion)).toString("base64url");
       const trozos = valor.match(/.{1,3180}/g) ?? [valor];

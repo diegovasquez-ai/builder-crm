@@ -22,6 +22,7 @@ una instancia por cliente con un solo prompt.
   deriva a una persona (pausa por conversacion).
 - **Reportes** reales por periodo y **dashboard** honesto.
 - **Ajustes**: canales, agente por canal, equipo, notificaciones push.
+- **Entrar con Google** y otros proveedores, opcional: ver [`docs/GOOGLE-AUTH.md`](docs/GOOGLE-AUTH.md).
 - **Automatizaciones** (disparador -> filtros -> acciones), **PWA** instalable.
 - **Simulador**: chatear con el agente sin ningun canal conectado (demos y
   autoverificacion).

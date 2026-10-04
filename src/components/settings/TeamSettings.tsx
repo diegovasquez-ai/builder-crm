@@ -286,9 +286,12 @@ function AddMemberDialog({
                 type="text"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="min. 8 caracteres"
+                placeholder="opcional, min. 8 caracteres"
                 autoComplete="off"
               />
+              <p className="text-xs text-muted-foreground">
+                Dejala vacia si la persona va a entrar con Google u otro proveedor.
+              </p>
             </div>
           </div>
           <p className="text-xs text-muted-foreground">

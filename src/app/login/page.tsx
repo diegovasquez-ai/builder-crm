@@ -1,10 +1,19 @@
 import { AuthForm } from "@/components/auth/AuthForm";
+import { proveedoresExternos, NOMBRE_PROVEEDOR } from "@/lib/auth-proveedores";
 
 export const metadata = {
   title: "Iniciar sesion",
 };
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
+  const externos = await proveedoresExternos();
+  const proveedores = externos.map((id) => ({ id, nombre: NOMBRE_PROVEEDOR[id] }));
+
   return (
     <>
       <div className="space-y-1 text-center">
@@ -15,7 +24,7 @@ export default function LoginPage() {
           Inicia sesion para gestionar tu pipeline
         </p>
       </div>
-      <AuthForm mode="login" />
+      <AuthForm mode="login" proveedores={proveedores} errorInicial={error ?? null} />
     </>
   );
 }

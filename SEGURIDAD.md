@@ -47,6 +47,14 @@ Lo minimo que hay que entender antes de desplegar una instancia para un cliente.
   agente, barridos, simulador y seed (admin con sesion o `AGENT_WORKER_SECRET`
   como Bearer). Sin `AGENT_WORKER_SECRET` el worker queda abierto: definirlo siempre.
 
+## Entrar con un proveedor externo
+
+Google y companeros son **opcionales** y no cambian quien entra. El proveedor solo dice
+quien es la persona; el acceso lo decide `team_members`. Alguien que entre con Google
+sin estar dado de alta en Ajustes -> Equipo termina en `/sin-acceso`, exactamente igual
+que si se registrara con email. Configuracion y fallos tipicos en
+[docs/GOOGLE-AUTH.md](docs/GOOGLE-AUTH.md).
+
 ## RLS (Row Level Security)
 
 - Supabase expone las tablas de `public` por su API REST con la anon key (que esta

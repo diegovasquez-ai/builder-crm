@@ -50,7 +50,10 @@ export async function POST(request: NextRequest) {
   let userId = existing?.id ?? null;
 
   if (!userId) {
-    if (password.length < 8) {
+    // La contrasena es opcional: si el equipo entra con un proveedor externo (Google y
+    // companeros), inventar una temporal solo agrega algo que nadie va a usar. Sin
+    // contrasena la cuenta existe y entra por el proveedor; con contrasena, por las dos.
+    if (password && password.length < 8) {
       return NextResponse.json(
         { error: "La contrasena temporal debe tener al menos 8 caracteres" },
         { status: 400 }
@@ -59,7 +62,7 @@ export async function POST(request: NextRequest) {
     const admin = createAdminClient();
     const { data, error } = await admin.auth.admin.createUser({
       email,
-      password,
+      password: password || undefined,
       email_confirm: true,
       user_metadata: { full_name: name || null },
     });

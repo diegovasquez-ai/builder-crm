@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AuthForm } from "@/components/auth/AuthForm";
 import { registroAbierto } from "@/app/login/actions";
 import { hayMiembros } from "@/lib/team";
+import { proveedoresExternos, NOMBRE_PROVEEDOR } from "@/lib/auth-proveedores";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +13,8 @@ export const metadata = {
 export default async function SignupPage() {
   const abierto = await registroAbierto();
   const primera = !(await hayMiembros());
+  const externos = await proveedoresExternos();
+  const proveedores = externos.map((id) => ({ id, nombre: NOMBRE_PROVEEDOR[id] }));
 
   if (!abierto) {
     return (
@@ -41,7 +44,7 @@ export default async function SignupPage() {
             : "Empieza a gestionar tus leads en minutos"}
         </p>
       </div>
-      <AuthForm mode="signup" />
+      <AuthForm mode="signup" proveedores={proveedores} />
     </>
   );
 }
