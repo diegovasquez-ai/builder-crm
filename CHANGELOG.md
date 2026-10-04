@@ -12,13 +12,13 @@ Trae esta version y vuelve a desplegar. No hay migraciones ni pasos manuales.
 
 ### Arreglado
 
-- **Cinco paginas no mandaban a .** Contactos, ajustes, actividades,
+- **Cinco paginas no mandaban a `/sin-acceso`.** Contactos, ajustes, actividades,
   automatizaciones y plantillas son componentes de cliente, asi que resolvian la sesion
   en el navegador y se renderizaban igual para alguien con sesion de Auth pero sin fila
-  en . No se escapaba ningun dato, porque toda ruta de datos exige
+  en `team_members`. No se escapaba ningun dato, porque toda ruta de datos exige
   membresia y devolvia 403, pero se veia el armazon de la aplicacion en lugar del aviso.
-  Ahora la puerta es la misma en todas:  para las dos primeras y
-  la comprobacion dentro de  para las otras tres.
+  Ahora la puerta es la misma en todas: `layoutSoloMiembros()` para las dos primeras y
+  la comprobacion dentro de `gateLayout` para las otras tres.
 
 ## 1.1.1 — 2026-10-03
 
