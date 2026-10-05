@@ -4,6 +4,30 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 1.3.1 — 2026-10-05
+
+### Actualizar desde 1.3.0
+
+Trae esta version y vuelve a desplegar. No hay migraciones ni pasos manuales.
+
+### Cambiado
+
+- **El aviso de Ajustes -> Canales mandaba a un archivo que no existe.** Decia que
+  `ZERNIO_API_KEY` va en `.env.local`, que es cierto en desarrollo y falso en una
+  instancia desplegada: ahi son las variables de la aplicacion. Ahora nombra los dos
+  lugares, avisa que hay que volver a desplegar para que tome el valor, y en el del
+  secreto del webhook recuerda que tiene que ser identico al de la suscripcion de Zernio
+  y que `npm run zernio:webhook` los deja iguales.
+- **Las credenciales de Zernio se leen al usarlas, no al importar el modulo.**
+  `src/lib/zernio/client.ts` y `webhooks.ts` las guardaban en constantes del modulo, y
+  `zernioConfig` era un objeto calculado en el primer import (ahora es una funcion). No
+  habia ningun fallo en produccion, porque el contenedor arranca de nuevo en cada
+  despliegue y ahi lee el entorno; es la misma forma que obligo a volver perezoso el
+  cliente de base, y atarla al momento del import es una trampa esperando a que alguien
+  importe el modulo desde un script o un contexto que se evalua antes de cargar el
+  entorno. Quedan con el patron viejo, a proposito y documentado, `meta-whatsapp.ts` (la
+  valvula de escape de Meta, que no se extiende) y `push.ts`.
+
 ## 1.3.0 — 2026-10-04
 
 ### Actualizar desde 1.2.2

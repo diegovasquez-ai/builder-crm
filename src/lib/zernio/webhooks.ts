@@ -1,6 +1,9 @@
 import crypto from "node:crypto";
 
-const WEBHOOK_SECRET = process.env.ZERNIO_WEBHOOK_SECRET || "";
+// Igual que en client.ts: se lee al usarlo, no al importar el modulo.
+function webhookSecret(): string {
+  return process.env.ZERNIO_WEBHOOK_SECRET || "";
+}
 
 /**
  * Verifica la firma de un webhook de Zernio.
@@ -17,7 +20,7 @@ const WEBHOOK_SECRET = process.env.ZERNIO_WEBHOOK_SECRET || "";
 export function verifyZernioSignature(
   rawBody: string,
   signatureHeader: string | null | undefined,
-  secret: string = WEBHOOK_SECRET
+  secret: string = webhookSecret()
 ): boolean {
   if (!secret) {
     console.warn(
@@ -47,7 +50,7 @@ export function verifyZernioSignature(
 }
 
 export function hasZernioWebhookSecret(): boolean {
-  return WEBHOOK_SECRET.length > 0;
+  return webhookSecret().length > 0;
 }
 
 /**

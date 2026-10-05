@@ -11,13 +11,14 @@ export async function GET() {
   const auth = await requireMember();
   if ("response" in auth) return auth.response;
   const [accounts, conectores] = await Promise.all([listChannelAccounts(), estadoConectores()]);
+  const zernio = zernioConfig();
   return NextResponse.json({
     accounts,
     conectores,
     config: {
-      hasApiKey: zernioConfig.hasApiKey,
-      hasWebhookSecret: zernioConfig.hasWebhookSecret,
-      profileId: zernioConfig.profileId,
+      hasApiKey: zernio.hasApiKey,
+      hasWebhookSecret: zernio.hasWebhookSecret,
+      profileId: zernio.profileId,
       whatsappProvider: whatsappProvider(),
     },
   });

@@ -8,20 +8,35 @@ import type { ZernioError, ZernioResult } from "./types";
  * `{ success: false, error }` para que el llamador no tenga que envolver en try/catch.
  */
 
-const API_BASE = process.env.ZERNIO_API_BASE || "https://zernio.com/api/v1";
-const API_KEY = process.env.ZERNIO_API_KEY || "";
-const PROFILE_ID = process.env.ZERNIO_PROFILE_ID || "";
+/**
+ * Las credenciales se leen DENTRO de las funciones, no al importar el modulo.
+ *
+ * Son variables de ejecucion: la instancia se construye una vez y cada cliente pone las
+ * suyas al desplegar. Capturarlas en constantes del modulo ataba su valor al momento del
+ * primer import, que es el mismo tropiezo que obligo a volver perezoso el cliente de base
+ * (ver src/db/index.ts y la nota en CLAUDE.md). Esto no cuesta nada: son lecturas de un
+ * objeto en memoria.
+ */
+const API_BASE_POR_DEFECTO = "https://zernio.com/api/v1";
+
+function apiBase(): string {
+  return process.env.ZERNIO_API_BASE || API_BASE_POR_DEFECTO;
+}
+
+function apiKey(): string {
+  return process.env.ZERNIO_API_KEY || "";
+}
 
 const TIMEOUT_MS = 15_000;
 const MAX_RETRIES = 2;
 const RETRIABLE_STATUS = new Set([429, 502, 503, 504]);
 
 export function hasZernioKey(): boolean {
-  return API_KEY.length > 0;
+  return apiKey().length > 0;
 }
 
 export function getProfileId(): string | null {
-  return PROFILE_ID || null;
+  return process.env.ZERNIO_PROFILE_ID || null;
 }
 
 export interface ZernioFetchOptions {
@@ -42,7 +57,7 @@ export async function zernioFetch<T>(
   path: string,
   options: ZernioFetchOptions = {}
 ): Promise<ZernioResult<T>> {
-  if (!API_KEY) {
+  if (!hasZernioKey()) {
     return fail(0, "ZERNIO_API_KEY no configurada");
   }
 
@@ -83,7 +98,7 @@ async function attemptFetch<T>(
     const res = await fetch(url, {
       method,
       headers: {
-        Authorization: `Bearer ${API_KEY}`,
+        Authorization: `Bearer ${apiKey()}`,
         Accept: "application/json",
         ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
         ...extraHeaders,
@@ -130,7 +145,7 @@ function buildUrl(
   path: string,
   query?: ZernioFetchOptions["query"]
 ): string {
-  const base = `${API_BASE}${path.startsWith("/") ? path : `/${path}`}`;
+  const base = `${apiBase()}${path.startsWith("/") ? path : `/${path}`}`;
   if (!query) return base;
 
   const params = new URLSearchParams();
@@ -183,9 +198,14 @@ function fail(status: number, message: string): { success: false; error: ZernioE
   return { success: false, error: { status, message } };
 }
 
-export const zernioConfig = {
-  hasApiKey: hasZernioKey(),
-  apiBase: API_BASE,
-  profileId: PROFILE_ID || null,
-  hasWebhookSecret: Boolean(process.env.ZERNIO_WEBHOOK_SECRET),
-};
+/** Estado de la configuracion, para Ajustes -> Canales. Es una funcion, no una constante:
+ *  lo que vale es el entorno de ahora, no el del primer import. Nunca devuelve la clave,
+ *  solo si esta puesta: esto viaja al navegador por /api/channels. */
+export function zernioConfig() {
+  return {
+    hasApiKey: hasZernioKey(),
+    apiBase: apiBase(),
+    profileId: getProfileId(),
+    hasWebhookSecret: Boolean(process.env.ZERNIO_WEBHOOK_SECRET),
+  };
+}

@@ -217,16 +217,21 @@ export function ChannelsSettings() {
     <div className="space-y-4">
       {!config.hasApiKey && (
         <Warning>
-          Falta <code className="bg-muted px-1 rounded">ZERNIO_API_KEY</code> en{" "}
-          <code className="bg-muted px-1 rounded">.env.local</code>. Sin eso no se
-          pueden listar ni conectar cuentas.
+          Falta <code className="bg-muted px-1 rounded">ZERNIO_API_KEY</code> en las
+          variables de la instancia (en Coolify, Environment Variables; en desarrollo,{" "}
+          <code className="bg-muted px-1 rounded">.env.local</code>). Sin eso no se
+          pueden listar ni conectar cuentas. Hay que volver a desplegar para que tome el
+          valor nuevo.
         </Warning>
       )}
       {!config.hasWebhookSecret && (
         <Warning>
-          Falta <code className="bg-muted px-1 rounded">ZERNIO_WEBHOOK_SECRET</code>.
-          El webhook rechaza todo hasta que este configurado (fail-closed), asi que no
-          van a entrar mensajes.
+          Falta <code className="bg-muted px-1 rounded">ZERNIO_WEBHOOK_SECRET</code> en
+          las variables de la instancia. El webhook rechaza todo hasta que este
+          configurado (fail-closed), asi que no van a entrar mensajes. Tiene que ser
+          identico al de la suscripcion en Zernio:{" "}
+          <code className="bg-muted px-1 rounded">npm run zernio:webhook</code> la deja
+          igual.
         </Warning>
       )}
 
