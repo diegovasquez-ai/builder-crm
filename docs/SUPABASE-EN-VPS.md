@@ -118,9 +118,11 @@ Con otro proxy, lo mismo con un recorte de prefijo. Un Caddy de 20 MB tambien si
 - **`relation "auth.users" does not exist` al migrar.** GoTrue todavia no arranco. Paso 3
   antes del 4.
 - **El navegador no puede iniciar sesion y en la consola se ve `undefined` como URL.**
-  Las variables `NEXT_PUBLIC_*` se hornean en el build, no en la ejecucion. En Coolify
-  hay que marcarlas como variables de build; la API de la version 4.3 no expone ese
-  interruptor, asi que se marca a mano en la interfaz y se vuelve a desplegar.
+  Era esto hasta 1.2.1: las `NEXT_PUBLIC_*` se horneaban en el build y la API de Coolify
+  4.3 no permite marcar una variable como de build. Desde 1.2.2 el servidor le entrega
+  esa configuracion al navegador al ejecutar, asi que alcanza con tenerlas en runtime y
+  volver a desplegar. Si lo seguis viendo, comproba que el bloque este en la pagina:
+  `curl -s https://crm.tudominio.com/login | grep builder-crm-config`.
 - **La cookie de sesion.** La libreria la nombra con la primera etiqueta del host de
   Supabase. Con `auth-demo.midominio.com` la cookie es `sb-auth-demo-auth-token`. Si
   cambias ese host, las sesiones abiertas dejan de valer.

@@ -42,7 +42,7 @@ Si hay conflictos:
   la config, o proponerlo al original.
 - `src/lib/modules/*.generated.ts`: tomar cualquiera y regenerar
   (`npm run modulos:registro`).
-- `supabase/migrations/0000_base.sql`: antes de 1.0.0 se regeneraba; desde 1.0.0 solo
+- La migracion base (`supabase/migrations/20261001000000_base.sql`): antes de 1.0.0 se regeneraba; desde 1.0.0 solo
   se agregan archivos, asi que no debe haber conflicto. Si lo hay, gana upstream.
 
 ## 3. Aplicar

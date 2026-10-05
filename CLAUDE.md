@@ -150,8 +150,15 @@ URL desplegada. No se delega la prueba al miembro ni al cliente.
   fragmento de la URL (por eso corre en el navegador) y limpia la barra. Las plantillas
   las sirve el propio CRM en `/correo/*.html`, publicas porque las descarga GoTrue.
   Ver `docs/CORREO.md`.
-- **Variables `NEXT_PUBLIC_*` se hornean en el build** (Docker: build args). El resto
-  es runtime. Nada de secretos en el codigo ni en `.mcp.json` (solo `.mcp.json.example`).
+- **Lo que el navegador necesita se sirve en EJECUCION, no en el build.** Next hornea
+  las `NEXT_PUBLIC_*` al compilar, y en una imagen compartida por muchas instancias eso
+  no sirve: el layout escribe la URL de Supabase, su clave anonima y las capacidades en
+  un bloque JSON (`src/lib/config-publica.ts`) y el navegador lo lee de ahi. Ningun
+  componente cliente lee `process.env` directo, y lo que falte (la clave VAPID) sale de
+  una ruta de API. Consecuencia practica: en Coolify TODAS las variables van en runtime y
+  no hay que marcar ninguna como build. El `Dockerfile` las sigue aceptando como build
+  args para plataformas que las hornean. Nada de secretos en el codigo ni en `.mcp.json`
+  (solo `.mcp.json.example`).
 - **Datos demo** por `POST /api/seed/demo` (admin o `AGENT_WORKER_SECRET`): usan el
   conector `simulador` para que la demo responda; los reportes solo excluyen a los
   contactos creados desde `/simulador`.

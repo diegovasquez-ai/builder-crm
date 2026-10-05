@@ -4,6 +4,43 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 1.3.2 — 2026-10-05
+
+### Actualizar desde 1.3.1
+
+Trae esta version y vuelve a desplegar. No hay migraciones. Si tenias el cron de
+`sweepers` encendido para una instancia en Vercel, vuelve a descomentarlo (ver abajo).
+
+### Arreglado
+
+- **El workflow de barridos fallaba cada media hora en cada clon del repo.** Estaba
+  programado cada 30 minutos y, sin los secretos configurados, el `curl` se quedaba sin
+  URL (`URL rejected: No host part`). Resultado para cualquier miembro que clonara: el
+  repo en rojo, un correo de fallo cada media hora y 1.440 minutos de Actions gastados al
+  mes para nada. Y es un workflow que **solo hace falta en Vercel**: en Coolify los
+  barridos corren dentro del proceso. Ahora viene con el cron apagado, se enciende
+  descomentando dos lineas, y si se corre a mano sin secretos explica que no hay nada que
+  barrer en vez de fallar.
+
+### Cambiado
+
+- **Ya no hay que marcar variables como "Build Variable" en Coolify.** Desde 1.2.2 la
+  configuracion publica se sirve en ejecucion, asi que el paso manual que la API de
+  Coolify no permite dejo de ser necesario. Lo decian el README, `.env.example`,
+  `CLAUDE.md`, la skill `deploy-coolify` y `docs/SUPABASE-EN-VPS.md`, cada uno a su
+  manera: los cinco quedaron corregidos. El `Dockerfile` sigue aceptando las
+  `NEXT_PUBLIC_*` como build args para plataformas que las hornean.
+- El diagnostico de `deploy-coolify` dice la causa real de un build que pide variables:
+  codigo que consulta la base o lee el entorno al importarse.
+
+### Agregado
+
+- **Las dos specs que faltaban**: `specs/nucleo/08-auth-externa.md` y
+  `09-correo-de-acceso.md`. Entrar con Google (1.2.0) y los correos de acceso (1.3.0) se
+  construyeron sin spec previa, contra el principio II de la constitucion. Ambas lo
+  declaran en el encabezado en vez de disimularlo, y con esto `specs/nucleo/` vuelve a
+  describir el sistema completo, que es lo que lee Claude al adaptar una instancia.
+
 ## 1.3.1 — 2026-10-05
 
 ### Actualizar desde 1.3.0

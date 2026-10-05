@@ -1,53 +1,79 @@
-# Barridos de recuperacion cada 30 minutos.
+# Barridos de recuperacion. SOLO hacen falta si despliegas en Vercel.
 #
-# Por que no van en vercel.json: el plan Hobby de Vercel solo admite crons UNA VEZ POR
-# DIA, y una expresion mas frecuente hace fallar el deploy. Los crons de vercel.json
-# quedan como respaldo diario; el ritmo real lo marca este workflow.
+# En Coolify los barridos corren dentro del proceso (`src/lib/barridos.ts`), asi que este
+# workflow no tiene nada que hacer: viene con el cron APAGADO. Si lo dejara encendido,
+# cada clon del repo fallaria cada media hora para siempre (sin secretos, el curl no
+# tiene a donde ir), llenaria de correos al miembro y gastaria 1.440 minutos de Actions
+# al mes para nada.
 #
-# Por que 30 y no 10 minutos: Actions factura por MINUTO REDONDEADO HACIA ARRIBA por
-# job, aunque el curl tarde 10 segundos. En un repo privado del plan Free hay 2.000
-# minutos gratis al mes:
+# Como encenderlo (solo en Vercel):
+#  1. Settings -> Secrets and variables -> Actions, y crea
+#       APP_BASE_URL         (ej. https://crm.cliente.com)
+#       AGENT_WORKER_SECRET  (el mismo valor que en Vercel)
+#  2. Descomenta el bloque `schedule` de abajo.
+#
+# Por que no van en vercel.json: el plan Hobby solo admite crons UNA VEZ POR DIA, y una
+# expresion mas frecuente hace fallar el deploy. Los crons de vercel.json quedan como
+# respaldo diario; el ritmo real lo marca este workflow.
+#
+# Por que 30 minutos y no 10: Actions factura por MINUTO REDONDEADO HACIA ARRIBA por job,
+# aunque el curl tarde 10 segundos. Con 2.000 minutos gratis al mes:
 #   cada 10 min = 4.320 ejecuciones = 4.320 min -> USD 18,56/mes de exceso
 #   cada 30 min = 1.440 ejecuciones = 1.440 min -> USD 0
-# Esto es una red de seguridad, no el camino normal: un mensaje entrante se contesta
-# en ~7s por el webhook. Media hora de ventana de recuperacion sobre un fallo raro no
-# cambia nada, y ahorra mas que todo el resto de la infraestructura junta.
+# Esto es una red de seguridad, no el camino normal: un mensaje entrante se contesta en
+# ~7 s por el webhook. Media hora de ventana sobre un fallo raro no cambia nada.
 #
 # Que barren:
-#  - /api/agent/process  -> jobs del agente que quedaron pendientes (el setTimeout del
+#  - /api/agent/process   -> jobs del agente que quedaron pendientes (el setTimeout del
 #    webhook murio antes de disparar el worker).
-#  - /api/webhooks/zernio -> eventos de Zernio claimeados pero sin procesar. El reintento
+#  - /api/webhooks/zernio -> eventos de Zernio reclamados pero sin procesar. El reintento
 #    de Zernio se auto-deduplica, asi que sin este barrido esos eventos se pierden.
-#
-# Configurar en el repo: Settings -> Secrets and variables -> Actions
-#   APP_BASE_URL        (ej https://crm.cliente.com)
-#   AGENT_WORKER_SECRET (el mismo valor que en Vercel)
+#  - /api/automations/process -> automatizaciones encoladas.
 
 name: Sweepers
 
 on:
-  schedule:
-    - cron: "*/30 * * * *"
+  # schedule:
+  #   - cron: "*/30 * * * *"
   workflow_dispatch:
 
 jobs:
   sweep:
     runs-on: ubuntu-latest
+    env:
+      BASE: ${{ secrets.APP_BASE_URL }}
+      SECRETO: ${{ secrets.AGENT_WORKER_SECRET }}
     steps:
+      # Sin secretos no se falla: se explica y se sale. Un workflow en rojo que es rojo
+      # a proposito entrena a ignorar los rojos de verdad.
+      - name: Comprobar configuracion
+        id: config
+        run: |
+          if [ -z "$BASE" ]; then
+            echo "Sin APP_BASE_URL configurado: no hay instancia que barrer."
+            echo "Normal si despliegas en Coolify (los barridos corren dentro del proceso)."
+            echo "listo=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "listo=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Barrer jobs del agente
+        if: steps.config.outputs.listo == 'true'
         run: |
           curl -sS -m 60 -o /dev/null -w "agent/process -> %{http_code}\n" \
-            -H "Authorization: Bearer ${{ secrets.AGENT_WORKER_SECRET }}" \
-            "${{ secrets.APP_BASE_URL }}/api/agent/process"
+            -H "Authorization: Bearer $SECRETO" \
+            "$BASE/api/agent/process"
 
       - name: Barrer eventos de webhook sin procesar
+        if: steps.config.outputs.listo == 'true'
         run: |
           curl -sS -m 60 -o /dev/null -w "webhooks/zernio -> %{http_code}\n" \
-            -H "Authorization: Bearer ${{ secrets.AGENT_WORKER_SECRET }}" \
-            "${{ secrets.APP_BASE_URL }}/api/webhooks/zernio"
+            -H "Authorization: Bearer $SECRETO" \
+            "$BASE/api/webhooks/zernio"
 
       - name: Barrer automatizaciones pendientes
+        if: steps.config.outputs.listo == 'true'
         run: |
           curl -sS -m 60 -o /dev/null -w "automations/process -> %{http_code}\n" \
-            -H "Authorization: Bearer ${{ secrets.AGENT_WORKER_SECRET }}" \
-            "${{ secrets.APP_BASE_URL }}/api/automations/process"
+            -H "Authorization: Bearer $SECRETO" \
+            "$BASE/api/automations/process"

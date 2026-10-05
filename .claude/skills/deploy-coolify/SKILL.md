@@ -97,11 +97,13 @@ real, dominio de correo).
 
 ## Diagnostico rapido
 
-- Build falla por `NEXT_PUBLIC_*`: no estaban marcadas como build args.
+- El build NO necesita variables: si falla pidiendo `DATABASE_URL` o una
+  `NEXT_PUBLIC_*`, el culpable es codigo nuevo que consulta la base o lee el entorno al
+  importarse (va dentro de la funcion). En Coolify todas las variables van en runtime.
 - Health 503 `db_unavailable`: `DATABASE_URL` incorrecta o el proyecto Supabase
   pausado. 503 `config_invalida`: `config/cliente.ts` no pasa la validacion (el
   detalle esta en el cuerpo).
 - Migraciones no corren: el contenedor arranca con `SKIP_MIGRATIONS=true`, o
   `DIRECT_URL` apunta al pooler de transacciones (usar el directo).
-- `/login` redirige en bucle: `NEXT_PUBLIC_SUPABASE_URL` del build no coincide con
-  el proyecto.
+- `/login` redirige en bucle: `NEXT_PUBLIC_SUPABASE_URL` no apunta al proyecto de esta
+  instancia, o `APP_BASE_URL` no es el dominio publico.

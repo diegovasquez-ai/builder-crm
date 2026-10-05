@@ -66,10 +66,13 @@ Resumen (el detalle paso a paso esta en la skill `deploy-coolify`):
 
 1. Proyecto Supabase -> `npm run db:migrar` y `npm run admin:crear` desde tu maquina.
 2. En Coolify: aplicacion desde el repo (build pack **Dockerfile**, puerto 3000,
-   dominio). Variables: las `NEXT_PUBLIC_*` como **build args**, el resto en runtime
-   (lista en [`.env.example`](.env.example)).
+   dominio) y las variables de [`.env.example`](.env.example), **todas en runtime**. No
+   hace falta marcar ninguna como "Build Variable": desde 1.2.2 el servidor le pasa al
+   navegador la configuracion publica en tiempo de ejecucion, asi que la misma imagen
+   sirve para cualquier instancia. El `Dockerfile` igual acepta las `NEXT_PUBLIC_*` como
+   build args, por si construis en una plataforma que las hornea (Vercel).
 3. Deploy. Las migraciones corren solas al arrancar el contenedor.
-4. `curl https://<dominio>/api/health` -> `{"ok":true,"version":"1.0.0",...}`.
+4. `curl https://<dominio>/api/health` -> `{"ok":true,"version":"<la del package.json>","db":"ok"}`.
 5. `node scripts/seed-demo.mjs --url https://<dominio>` y
    `node scripts/verificar-instancia.mjs --url https://<dominio> --email ... --password ...`.
 
@@ -108,7 +111,7 @@ supabase/          migraciones del nucleo (base, RLS, primer admin)
 scripts/           migrar, crear-admin, seed-demo, verificar-instancia, zernio:*
 docker/, Dockerfile, docker-compose.yml
 .claude/skills/    el arnes: 7 skills del flujo one-shot
-docs/              MCP, agente, guia de Zernio
+docs/              MCP, agente, Zernio, Supabase en tu VPS, entrar con Google, correo
 ```
 
 ## Scripts
