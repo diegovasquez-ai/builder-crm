@@ -79,7 +79,14 @@ const archivos = [
 async function conectar() {
   const intentos = 15;
   for (let i = 1; i <= intentos; i++) {
-    const sql = postgres(url, { prepare: false, max: 1, connect_timeout: 10 });
+    const sql = postgres(url, {
+      prepare: false,
+      max: 1,
+      connect_timeout: 10,
+      // Las migraciones usan RAISE NOTICE para contar lo que hicieron. Sin esto, el
+      // driver imprime el objeto entero del aviso y parece que algo se rompio.
+      onnotice: (aviso) => console.log(`[migrar] aviso: ${aviso.message}`),
+    });
     try {
       await sql`select 1`;
       return sql;
@@ -140,7 +147,20 @@ try {
     console.log(`[migrar] listo: ${aplicadas.size + pendientes.length} migraciones en total`);
   }
 } catch (err) {
-  console.error("[migrar] fallo:", err instanceof Error ? err.message : err);
+  const mensaje = err instanceof Error ? err.message : String(err);
+  console.error("[migrar] fallo:", mensaje);
+  // Los dos tropiezos de quien aloja su propio Postgres. En Supabase cloud no pasan
+  // porque el esquema auth y auth.users ya vienen hechos.
+  if (/schema "auth" does not exist/i.test(mensaje)) {
+    console.error("[migrar] La base no tiene el esquema auth.");
+    console.error("[migrar] Si es Supabase cloud, la URL no apunta a ese proyecto.");
+    console.error("[migrar] Si es tu propio Postgres: npm run auth:preparar (docs/SUPABASE-EN-VPS.md).");
+  } else if (/relation "auth\.users" does not exist/i.test(mensaje)) {
+    console.error("[migrar] El esquema auth existe pero todavia no hay auth.users.");
+    console.error("[migrar] Eso lo crea GoTrue la primera vez que arranca: levanta el");
+    console.error("[migrar] contenedor de autenticacion y volve a correr esto");
+    console.error("[migrar] (docs/SUPABASE-EN-VPS.md: el paso 3 va antes del 4).");
+  }
   process.exitCode = 1;
 } finally {
   await sql.end({ timeout: 5 });

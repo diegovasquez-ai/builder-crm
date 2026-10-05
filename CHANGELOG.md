@@ -4,6 +4,44 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 1.3.4 — 2026-10-05
+
+Salio de recorrer el camino de un miembro de verdad: clonar el repo publicado en una
+carpeta vacia, instalar, migrar una base nueva y adaptar la plantilla a un cliente
+inventado. Tres cosas no estaban como decian estar.
+
+### Actualizar desde 1.3.3
+
+Trae esta version y vuelve a desplegar. No hay migraciones. Despues de actualizar,
+`src/lib/modules/*.generated.ts` deja de estar versionado: si tu instancia los tenia
+modificados, no pasa nada, se regeneran solos al construir.
+
+### Arreglado
+
+- **Activar un modulo ensuciaba dos archivos del nucleo.** El registro de modulos
+  (`src/lib/modules/*.generated.ts`) se genera desde `config/modulos.json`, pero estaba
+  versionado, asi que cualquier adaptacion dejaba cambios dentro de `src/`: rompia la
+  promesa de que `git status` solo muestra la zona del cliente y garantizaba un conflicto
+  en cada actualizacion desde el repo original. Ahora esta en `.gitignore` y lo generan
+  igual `next build`, `npm run dev` y `npm run typecheck`.
+- **El `package-lock.json` publicado decia `1.0.0`.** Las versiones se subian a mano en
+  `package.json` y el lockfile quedo atras, con un `hasInstallScript` que sobro de los
+  tiempos de SQLite. Resultado: el primer `npm install` de cualquier miembro le dejaba el
+  lockfile modificado sin que hubiera tocado nada. Corregido, y de ahora en mas la version
+  se sube con `npm version`, que actualiza los dos archivos.
+- **El runner de migraciones no explicaba los dos fallos mas probables.** Contra tu propio
+  Postgres, antes de arrancar GoTrue, decia `schema "auth" does not exist` y nada mas.
+  Ahora dice que corras `npm run auth:preparar`, y en el otro caso que levantes el
+  contenedor de autenticacion primero. Tambien imprime los avisos del servidor en una
+  linea en vez de volcar el objeto entero del driver, que parecia un error.
+
+### Verificado en el camino
+
+Con una base Postgres vacia y el repo recien clonado: las 5 migraciones del nucleo entran
+limpias, quedan 23 tablas, **ninguna sin RLS**, 20 politicas y el rol `anon` sin un solo
+privilegio. Adaptado a un cliente inventado (marca, pipeline y el modulo `visitas`
+activo), la migracion del modulo entra sola y `npm run build` pasa.
+
 ## 1.3.3 — 2026-10-05
 
 ### Actualizar desde 1.3.2

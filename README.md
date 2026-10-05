@@ -34,7 +34,9 @@ una instancia por cliente con un solo prompt.
 
 ## Requisitos
 
-- Node.js 22 y npm.
+- Node.js 22 y npm. En Windows, clona en una ruta corta (`C:\proyectos\...`): con
+  carpetas muy anidadas, el compilador de Next falla por el limite de caracteres del
+  sistema de archivos.
 - Una cuenta de **Supabase** (un proyecto por cliente; el plan gratuito alcanza), o
   tu propio Postgres mas GoTrue en el VPS (ver [`docs/SUPABASE-EN-VPS.md`](docs/SUPABASE-EN-VPS.md)).
 - Para desplegar: un VPS con **Coolify** y un dominio.

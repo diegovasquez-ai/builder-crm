@@ -16,3 +16,4 @@ docs
 !README.md
 Dockerfile
 docker-compose*.yml
+src/lib/modules/*.generated.ts

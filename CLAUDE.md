@@ -86,6 +86,8 @@ URL desplegada. No se delega la prueba al miembro ni al cliente.
   de la config); fechas con `date-fns`.
 - **Rutas de API**: `requireMember()` / `requireAdmin()` de `src/lib/api-auth.ts` al
   inicio; acceso por contacto con `canAccessContactId`; lo ajeno responde **404**, no 403.
+- **Version**: se sube con `npm version <nueva> --no-git-tag-version`, que actualiza
+  `package.json` y `package-lock.json` a la vez. A mano se desincronizan.
 - **Commits**: uno por cambio logico, en espanol, primera linea imperativa y
   concreta ("Agregar modulo pedidos", "Corregir ventana de 24h en Messenger"); sin
   backticks en el mensaje. Nunca `.env*`, `.mcp.json` ni datos reales.
@@ -134,7 +136,9 @@ URL desplegada. No se delega la prueba al miembro ni al cliente.
   schema; desde 1.0.0 solo se agregan archivos. Corren solas al arrancar el contenedor.
 - **Registro de modulos generado**: `config/modulos.json` ->
   `src/lib/modules/*.generated.ts` (lo escribe `next.config.ts` y `npm run
-  typecheck`). Un modulo inactivo no entra al bundle; sus rutas dan 404.
+  typecheck`). Un modulo inactivo no entra al bundle; sus rutas dan 404. Esos dos
+  archivos **no se versionan**: si se versionaran, activar un modulo dejaria cambios
+  dentro de `src/` y chocarian en cada actualizacion del nucleo.
 - **Primera cuenta**: el disparador `on_auth_user_created` da de alta en
   `team_members` SOLO a la primera cuenta de la instancia, como admin. A partir de ahi
   nadie entra solo: un usuario de Auth sin fila en `team_members` cae en `/sin-acceso`.

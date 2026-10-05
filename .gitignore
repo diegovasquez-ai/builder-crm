@@ -49,3 +49,8 @@ Thumbs.db
 
 # SQLite local heredado de auto-crm (no se usa; la base es Supabase)
 /data/
+
+# Registro de modulos: se genera desde config/modulos.json al arrancar, construir o
+# correr typecheck (scripts/generar-registro-modulos.mjs). Versionarlo hacia que activar
+# un modulo ensuciara dos archivos de src/ (el nucleo) y chocara en cada actualizacion.
+/src/lib/modules/*.generated.ts
