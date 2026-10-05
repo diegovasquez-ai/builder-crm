@@ -4,6 +4,21 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 1.3.5 — 2026-10-05
+
+### Actualizar desde 1.3.4
+
+Trae esta version y vuelve a desplegar. No hay migraciones.
+
+### Arreglado
+
+- **El lockfile seguia cambiando en el primer `npm install`.** 1.3.4 arreglo el numero de
+  version pero no el resto: el lockfile publicado declaraba `hasInstallScript`, que sobro
+  de los tiempos de SQLite, y npm lo reemplaza por `license` en cuanto alguien instala.
+  Comprobado en un clon limpio: ahora el primer `npm install` deja el arbol sin cambios, y
+  una adaptacion a un cliente solo muestra `config/cliente.ts` y `config/modulos.json`,
+  que es lo que la constitucion promete.
+
 ## 1.3.4 — 2026-10-05
 
 Salio de recorrer el camino de un miembro de verdad: clonar el repo publicado en una
