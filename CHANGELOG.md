@@ -4,6 +4,32 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 1.3.3 — 2026-10-05
+
+### Actualizar desde 1.3.2
+
+Trae esta version y vuelve a desplegar. No hay migraciones. El primer despliegue tarda
+como siempre (los caches nacen vacios); el siguiente tendria que ser bastante mas corto.
+
+### Cambiado
+
+- **El despliegue reinstalaba las 817 dependencias cada vez.** El Dockerfile copia
+  `package.json` antes de `npm ci`, y cada version nueva cambia ese archivo (el numero de
+  version), asi que la capa se invalidaba siempre: 4,5 minutos medidos en el VPS de la
+  demo bajando y descomprimiendo lo mismo que ya estaba. Ahora `npm ci` usa un cache de
+  BuildKit (`/root/.npm`), que sobrevive a la invalidacion de la capa. Se agrega tambien
+  un cache para `.next/cache`: con Turbopack ayuda poco, pero no cuesta nada.
+- El encabezado del `Dockerfile` ya no dice que haya que marcar variables como de build:
+  desde 1.2.2 el build no necesita ninguna variable.
+
+### Agregado
+
+- El arnes avisa de algo que pasa en Coolify y manda a buscar problemas que no existen:
+  **despues de un despliegue "completado" el contenedor viejo sigue sirviendo un rato**,
+  asi que el dominio alterna las dos versiones y la verificacion mira codigo viejo la
+  mitad de las veces. `probar-instancia` comprueba la version varias veces antes de
+  diagnosticar, y `deploy-coolify` lo lista primero en su diagnostico.
+
 ## 1.3.2 — 2026-10-05
 
 ### Actualizar desde 1.3.1

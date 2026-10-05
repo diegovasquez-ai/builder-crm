@@ -5,15 +5,24 @@
 # Tres etapas: deps (npm ci) -> builder (next build, standalone) -> runner (minima,
 # usuario sin privilegios, migraciones al arrancar, healthcheck sobre /api/health).
 #
-# Las NEXT_PUBLIC_* se hornean en el bundle del navegador, por eso llegan como BUILD
-# ARGS (en Coolify: marcar la variable como "Build Variable"). El resto del entorno
+# Ninguna variable hace falta para construir: desde 1.2.2 la configuracion publica se
+# sirve en ejecucion (src/lib/config-publica.ts). Las NEXT_PUBLIC_* siguen aceptandose
+# como build args para plataformas que las hornean (Vercel); el resto del entorno
 # (DATABASE_URL, OPENROUTER_API_KEY, ZERNIO_*, ...) es de runtime y NO va aqui.
+#
+# Los dos `--mount=type=cache` no son adorno. Cada version nueva cambia package.json (el
+# numero de version), eso invalida la capa del `npm ci` y sin cache se vuelven a bajar y
+# descomprimir 817 paquetes en cada despliegue: 4,5 minutos medidos en el VPS de la demo.
+# Con el cache de npm se saltea la red y la descompresion. El de Next ayuda poco con
+# Turbopack (deja un cache chico en disco) y mucho si algun dia se vuelve a webpack: se
+# deja porque no cuesta nada. Son caches del constructor: no entran en la imagen final y,
+# si el servidor los limpia, el build sigue funcionando, solo tarda como antes.
 # ============================================================================
 
 FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci --ignore-scripts
+RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts
 
 FROM node:22-alpine AS builder
 WORKDIR /app
@@ -32,7 +41,7 @@ ENV SOURCE_COMMIT=$SOURCE_COMMIT \
     NEXT_PUBLIC_VAPID_PUBLIC_KEY=$NEXT_PUBLIC_VAPID_PUBLIC_KEY \
     NEXT_TELEMETRY_DISABLED=1 \
     NODE_ENV=production
-RUN npm run build
+RUN --mount=type=cache,target=/app/.next/cache npm run build
 
 FROM node:22-alpine AS runner
 WORKDIR /app

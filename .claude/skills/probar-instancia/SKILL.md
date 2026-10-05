@@ -62,6 +62,18 @@ Sale con codigo 1 si algo fallo e imprime una tabla con cada check.
 | agente responde pero no mueve la etapa | el prompt no indica cuando mover | ajustar `agente.prompt` en la config (o Ajustes -> Agente) y repetir |
 | modulo 404 | no esta en `config/modulos.json` del build desplegado | activar, commit, redeploy, `db:migrar` |
 
+**Antes de dar un problema por real, comproba la version dos o tres veces:**
+
+```bash
+for i in 1 2 3; do curl -s https://<dominio>/api/health; echo; sleep 3; done
+```
+
+Coolify suele dejar el contenedor viejo sirviendo un rato despues de un despliegue
+"completado", asi que el dominio responde alternando las dos versiones y la mitad de los
+checks miran codigo viejo. Si ves versiones distintas, reinicia la aplicacion (en la
+interfaz, o `POST /api/v1/applications/<uuid>/restart`) y recien entonces verifica. Visto
+dos veces en la instancia de demostracion.
+
 Corrige, redespliega y vuelve a correr el script. Repite hasta verde. Si un check no
 puede cumplirse por una decision externa (sin OpenRouter, sin logo), dejalo
 explicito en la entrega: nunca lo escondas.

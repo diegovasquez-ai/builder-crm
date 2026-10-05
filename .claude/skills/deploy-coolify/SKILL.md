@@ -97,6 +97,11 @@ real, dominio de correo).
 
 ## Diagnostico rapido
 
+- **El dominio responde dos versiones distintas.** Coolify deja el contenedor viejo
+  sirviendo despues de marcar el despliegue como completado: `/api/health` alterna entre
+  la version nueva y la anterior. Reinicia la aplicacion y vuelve a comprobar antes de
+  buscar la causa en el codigo.
+
 - El build NO necesita variables: si falla pidiendo `DATABASE_URL` o una
   `NEXT_PUBLIC_*`, el culpable es codigo nuevo que consulta la base o lee el entorno al
   importarse (va dentro de la funcion). En Coolify todas las variables van en runtime.
