@@ -87,6 +87,20 @@ que si se registrara con email. Configuracion y fallos tipicos en
 | `/api/agent/process`, barridos | `AGENT_WORKER_SECRET` |
 | `/api/health` | publico, sin datos sensibles (solo nombres de variables faltantes) |
 
+## Escanear el repo antes de publicarlo
+
+Si vas a hacer publico tu fork, pasale gitleaks al **historial completo**, no al working
+tree: lo que se filtro en un commit viejo sigue ahi aunque el archivo ya no exista.
+
+```bash
+gitleaks detect --source . --redact
+```
+
+En el repo original da un unico hallazgo, y es falso: `docs/GOOGLE-AUTH.md` tiene un
+`curl` de ejemplo con el texto `TU_ANON_KEY` donde iria la clave, y la regla
+`curl-auth-header` marca cualquier cabecera de autenticacion. La clave anonima, ademas,
+es publica por diseno: lo que protege los datos es RLS mas la autorizacion del servidor.
+
 ## Checklist antes de entregar una instancia
 
 1. `AGENT_WORKER_SECRET`, `LEADS_WEBHOOK_SECRET` y `ZERNIO_WEBHOOK_SECRET` definidos

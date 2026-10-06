@@ -17,3 +17,5 @@ docs
 Dockerfile
 docker-compose*.yml
 src/lib/modules/*.generated.ts
+tests
+vitest.config.mts

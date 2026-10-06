@@ -1,6 +1,6 @@
 {
   "name": "builder-crm",
-  "version": "1.3.6",
+  "version": "1.4.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -17,6 +17,8 @@
     "channels:purge": "node scripts/channels-purge.mjs",
     "storage:setup": "node scripts/storage-setup.mjs",
     "typecheck": "node scripts/generar-registro-modulos.mjs && tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "db:migrar": "node scripts/migrar.mjs",
     "db:status": "node scripts/migrar.mjs --status",
     "db:generate": "drizzle-kit generate",
@@ -61,7 +63,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^22.20.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/web-push": "^3.6.4",
@@ -71,7 +73,8 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.2",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^5.0.3"
   },
   "description": "CRM multicanal con agente de IA, para agencias que despliegan una instancia por cliente",
   "license": "UNLICENSED"

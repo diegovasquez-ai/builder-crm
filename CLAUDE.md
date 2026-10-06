@@ -71,9 +71,15 @@ reutilizable), `actualizar-desde-original` (traer una version nueva del nucleo a
 instancia adaptada). Las skills `supabase`, `playwright-cli` y `memory-manager` son de
 apoyo.
 
-**Definicion de hecho**: `npm run typecheck && npm run lint && npm run build` es el
-piso. Una instancia esta terminada cuando `probar-instancia` pasa en verde contra la
-URL desplegada. No se delega la prueba al miembro ni al cliente.
+**Definicion de hecho**: `npm test && npm run typecheck && npm run lint && npm run build`
+es el piso, y lo mismo corre el CI. Una instancia esta terminada cuando
+`probar-instancia` pasa en verde contra la URL desplegada. No se delega la prueba al
+miembro ni al cliente.
+
+Los tests de `tests/` cubren los invariantes que **fallan en silencio**: la firma del
+webhook, la ventana de 24 h, el filtro por rol, la validacion de `config/cliente.ts`, el
+bloque de configuracion publica y las plantillas de correo. Corren sin base y sin red en
+un segundo. Lo que necesita base o navegador se prueba con `verificar-instancia`.
 
 ## Convenciones
 
@@ -174,6 +180,7 @@ URL desplegada. No se delega la prueba al miembro ni al cliente.
 
 ```bash
 npm run dev                 # local (http://localhost:3000)
+npm test                    # invariantes del nucleo (vitest, sin base ni red)
 npm run typecheck && npm run lint && npm run build
 npm run db:migrar           # aplica migraciones pendientes (nucleo + modulos activos)
 npm run db:status           # que esta aplicado y que falta

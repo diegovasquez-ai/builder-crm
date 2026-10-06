@@ -1,5 +1,5 @@
-# CI de Builder CRM: typecheck + lint + build, con modulos apagados y con la plantilla
-# inmobiliaria activa (los dos extremos que un cliente puede desplegar).
+# CI de Builder CRM: tests + typecheck + lint + build, con modulos apagados y con la
+# plantilla inmobiliaria activa (los dos extremos que un cliente puede desplegar).
 #
 # No necesita credenciales, y la falta de DATABASE_URL es a proposito: el build no debe
 # necesitar la base (en el Dockerfile solo las NEXT_PUBLIC_* son build args). Si alguien
@@ -44,6 +44,8 @@ jobs:
         run: |
           printf '{ "activos": %s }\n' '${{ matrix.modulos }}' > config/modulos.json
           cat config/modulos.json
+      - run: npm run test
+        if: ${{ !cancelled() }}
       - run: npm run typecheck
         if: ${{ !cancelled() }}
       - run: npm run lint

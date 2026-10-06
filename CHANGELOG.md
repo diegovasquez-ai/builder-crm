@@ -4,6 +4,43 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 1.4.0 — 2026-10-06
+
+### Actualizar desde 1.3.6
+
+Trae esta version. No hay migraciones ni cambios de comportamiento: entran los tests y el
+CI pasa a correrlos. Si tenias un fork, `npm install` te trae vitest.
+
+### Agregado
+
+- **Primera suite de tests: 35 casos en 6 archivos, un segundo, sin base ni red.** No
+  cubren todo a proposito: cubren los invariantes que, cuando se rompen, **no avisan**.
+  - *Firma del webhook*: sin secreto rechaza (fail-closed), firma de otro secreto
+    rechaza, un caracter cambiado en el cuerpo rechaza, una firma corta no revienta el
+    handler, y tolera el prefijo `sha256=` de Meta.
+  - *Ventana de 24 h*: adentro deja texto libre, afuera no, en el limite exacto sigue
+    abierta, y sin mensaje entrante previo se considera cerrada.
+  - *Filtro por rol*: el administrador es el unico sin filtro; el asesor filtra por
+    `owner_id` contra su propio id (se traduce la condicion a SQL para verlo); un rol
+    desconocido se trata como asesor, no como admin.
+  - *Esquema de `config/cliente.ts`*: etapas repetidas, pipeline de una sola etapa, color
+    que no es `#rrggbb`, clave que no es snake_case, campo de seleccion sin opciones y
+    campos repetidos.
+  - *Configuracion publica*: escapa `<` para que no se pueda cerrar la etiqueta `script`
+    desde un valor del entorno.
+  - *Plantillas de correo*: conservan los marcadores que rellena el proveedor y escapan
+    el nombre de la marca.
+- `npm test` y `npm run test:watch`. El CI los corre **antes** de typecheck, lint y build,
+  en las dos puntas de la matriz de modulos.
+
+### Cambiado
+
+- `@types/node` pasa de 20 a 22, que es la version de Node que el repo pide desde el
+  README. Estaban desalineados desde antes.
+- `SEGURIDAD.md` explica como escanear el historial con gitleaks antes de hacer publico un
+  fork, y cual es el unico hallazgo que da (un placeholder en un ejemplo de la
+  documentacion).
+
 ## 1.3.6 — 2026-10-06
 
 ### Actualizar desde 1.3.5

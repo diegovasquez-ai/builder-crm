@@ -108,6 +108,7 @@ config/            zona del cliente: cliente.ts, modulos.json, plantillas/
 modules/           modulos (ejemplo, propiedades, visitas, _plantilla)
 public/marca/      logo e icono del cliente
 specs/             constitucion, plantilla de spec, specs del nucleo y del cliente
+tests/             invariantes que fallan en silencio (firma, ventana 24h, roles)
 src/               nucleo (app, lib, components, db)
 supabase/          migraciones del nucleo (base, RLS, primer admin)
 scripts/           migrar, crear-admin, seed-demo, verificar-instancia, zernio:*
@@ -121,7 +122,8 @@ docs/              MCP, agente, Zernio, Supabase en tu VPS, entrar con Google, c
 | Comando | Que hace |
 |---|---|
 | `npm run dev` / `build` / `start` | desarrollo, build, servidor |
-| `npm run typecheck` / `lint` | gate tecnico (CI corre los dos + build) |
+| `npm test` | invariantes del nucleo (vitest, sin base ni red, ~1 s) |
+| `npm run typecheck` / `lint` | gate tecnico (CI corre los tres + build) |
 | `npm run db:migrar` / `db:status` | migraciones del nucleo + modulos activos |
 | `npm run admin:crear -- --email --password` | crea o promueve un administrador |
 | `npm run claves:supabase` / `auth:preparar` | base y Auth en tu propio VPS, sin Supabase cloud |
