@@ -150,10 +150,12 @@ Cambios por version: [`CHANGELOG.md`](CHANGELOG.md). Secretos, roles y RLS:
 
 ## Licencia
 
-**Propietaria.** Copyright (c) 2026 Diego Vásquez. Los miembros de IA Builder Lab
-pueden adaptarlo, desplegar instancias para sus clientes y cobrar por ellas; no
-pueden publicar el codigo ni redistribuirlo como plantilla o producto. Los terminos
-completos estan en [`LICENSE`](LICENSE).
+**Codigo visible, propietario.** Copyright (c) 2026 Diego Vásquez.
+
+Cualquiera puede leerlo, clonarlo, correrlo y usarlo en su propio negocio. Desplegar
+instancias para clientes y cobrar por ellas es de los miembros de IA Builder Lab.
+Nadie puede revenderlo ni redistribuirlo como plantilla, curso o producto. Los
+terminos completos estan en [`LICENSE`](LICENSE).
 
 Nacio como fork de [auto-crm](https://github.com/Hainrixz/auto-crm), cuya licencia
 MIT se conserva en `LICENSE` para las partes que vienen de ahi. La arquitectura de

@@ -2,34 +2,47 @@ Licencia de Builder CRM
 
 Copyright (c) 2026 Diego Vásquez. Todos los derechos reservados.
 
-Builder CRM es software propietario. Este archivo dice quien puede usarlo y para
-que. Si algo no esta permitido aqui, no esta permitido.
+Builder CRM es software propietario de codigo visible. El codigo esta a la vista para
+que cualquiera pueda leerlo, estudiarlo y probarlo; lo que cambia segun quien seas es
+para que lo podes usar. Si algo no esta permitido aqui, no esta permitido.
 
 1. QUIEN PUEDE USARLO
 
-   Los miembros de IA Builder Lab, mientras su acceso a la comunidad este vigente.
-   El acceso al repositorio es personal: no se comparte, ni se cede, ni se publica.
+   a) Cualquier persona, sin pedir permiso y sin costo: para leerlo, estudiarlo,
+      correrlo y usarlo en su propio negocio.
+   b) Los miembros de IA Builder Lab, mientras su acceso a la comunidad este vigente:
+      ademas, para desplegar instancias para clientes y cobrar por ellas.
 
-2. QUE PUEDEN HACER
+2. QUE PUEDE HACER CUALQUIERA
 
-   a) Clonar el repositorio, modificarlo y adaptarlo.
-   b) Desplegar todas las instancias que quieran para sus propios clientes.
-   c) Cobrar por esas instancias, por el desarrollo y por el mantenimiento. El
+   a) Leer el codigo, estudiarlo y aprender de el.
+   b) Clonarlo, modificarlo y correrlo en su propia maquina.
+   c) Desplegar una instancia para su propio negocio, operada por el o por su equipo.
+   d) Citarlo, escribir sobre el y mostrarlo, con atribucion.
+
+3. QUE PUEDEN HACER ADEMAS LOS MIEMBROS
+
+   a) Desplegar todas las instancias que quieran para sus propios clientes.
+   b) Cobrar por esas instancias, por el desarrollo y por el mantenimiento. El
       trabajo que un miembro hace sobre una instancia es suyo.
-   d) Entregarle a un cliente la instancia desplegada y, si el encargo lo incluye,
+   c) Entregarle a un cliente la instancia desplegada y, si el encargo lo incluye,
       el codigo de esa instancia, que queda sujeto a esta misma licencia.
 
-3. QUE NO PUEDEN HACER
+4. QUE NO PUEDE HACER NADIE
 
-   a) Publicar el codigo, total o parcialmente, en un repositorio publico o en
-      cualquier otro lugar de acceso abierto.
+   a) Desplegar instancias para terceros, ni cobrar por ellas, sin ser miembro de
+      IA Builder Lab.
    b) Revender, regalar o redistribuir Builder CRM como plantilla, curso, producto
       o parte de uno, con o sin modificaciones.
-   c) Dar acceso al codigo a quien no sea miembro de IA Builder Lab o cliente suyo
-      segun el punto 2.d.
-   d) Quitar este archivo o los avisos de autoria del codigo.
+   c) Presentarlo como propio, quitar este archivo o quitar los avisos de autoria.
+   d) Usar el nombre "Builder CRM" para un producto o servicio propio.
 
-4. SIN GARANTIA
+   Sobre los forks: al estar el repositorio publicado en GitHub, los terminos de
+   GitHub le permiten a cualquier usuario verlo y forkearlo dentro de la plataforma.
+   Esta licencia no lo impide ni lo puede impedir; lo que regula es para que se puede
+   usar el codigo, dentro o fuera de un fork.
+
+5. SIN GARANTIA
 
    EL SOFTWARE SE ENTREGA "TAL CUAL", SIN GARANTIA DE NINGUN TIPO, EXPRESA O
    IMPLICITA, INCLUIDAS LAS DE COMERCIABILIDAD, IDONEIDAD PARA UN FIN DETERMINADO Y
@@ -37,11 +50,10 @@ que. Si algo no esta permitido aqui, no esta permitido.
    RECLAMACION, DANO U OTRA RESPONSABILIDAD, YA SEA EN UNA ACCION CONTRACTUAL,
    EXTRACONTRACTUAL O DE OTRO TIPO, DERIVADA DEL SOFTWARE O DE SU USO.
 
-   Quien despliega una instancia para un cliente es responsable de esa instancia:
-   de sus datos, de sus credenciales y de lo que el agente de IA le responda a las
-   personas que escriben.
+   Quien despliega una instancia es responsable de esa instancia: de sus datos, de sus
+   credenciales y de lo que el agente de IA le responda a las personas que escriben.
 
-5. SOFTWARE DE TERCEROS
+6. SOFTWARE DE TERCEROS
 
    Builder CRM nacio como un fork de auto-crm, que se distribuye bajo licencia MIT.
    Esa licencia obliga a conservar su aviso de copyright en los derivados, y aqui

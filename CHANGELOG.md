@@ -4,6 +4,31 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 1.4.2 — 2026-10-06
+
+### Actualizar desde 1.4.1
+
+Trae esta version. Nada que hacer: solo cambia la licencia y el README.
+
+### Cambiado
+
+- **El repositorio es publico y la licencia lo acompana.** Hasta 1.4.1 la licencia decia
+  que solo los miembros de IA Builder Lab podian usar el codigo y que no se podia publicar
+  en un repositorio abierto, lo que en un repo publico se contradice solo. Ahora tiene dos
+  niveles: **cualquiera** puede leerlo, clonarlo, correrlo y usarlo en su propio negocio;
+  **desplegar instancias para clientes y cobrar por ellas** es de los miembros. Lo que
+  sigue prohibido para todos es revenderlo o redistribuirlo como plantilla, curso o
+  producto, y presentarlo como propio. Sigue siendo propietario y sigue siendo MIT lo que
+  viene de auto-crm, en su seccion aparte.
+- **La licencia dice que pasa con los forks.** Al estar el repositorio publicado en
+  GitHub, sus terminos le permiten a cualquier usuario verlo y forkearlo dentro de la
+  plataforma, y ninguna licencia puede impedirlo. Queda escrito en el punto 4 para que
+  nadie lea "no redistribuir" y piense que la licencia es papel mojado al ver un fork: lo
+  que se regula es para que se usa el codigo, dentro o fuera del fork.
+- `package.json` declara `"license": "SEE LICENSE IN LICENSE"`, que es la forma que npm
+  documenta para una licencia propia. `UNLICENSED` significaba "no le doy permiso a
+  nadie", y ya no es cierto.
+
 ## 1.4.1 — 2026-10-06
 
 ### Actualizar desde 1.4.0
