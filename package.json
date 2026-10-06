@@ -1,6 +1,6 @@
 {
   "name": "builder-crm",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -17,8 +17,8 @@
     "channels:purge": "node scripts/channels-purge.mjs",
     "storage:setup": "node scripts/storage-setup.mjs",
     "typecheck": "node scripts/generar-registro-modulos.mjs && tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "node scripts/generar-registro-modulos.mjs && vitest run",
+    "test:watch": "node scripts/generar-registro-modulos.mjs && vitest",
     "db:migrar": "node scripts/migrar.mjs",
     "db:status": "node scripts/migrar.mjs --status",
     "db:generate": "drizzle-kit generate",

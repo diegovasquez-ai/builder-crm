@@ -4,6 +4,21 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 1.4.1 — 2026-10-06
+
+### Actualizar desde 1.4.0
+
+Trae esta version. Nada mas.
+
+### Arreglado
+
+- **`npm test` fallaba en un clon limpio.** Desde 1.3.4 el registro de modulos no se
+  versiona (lo generan `build`, `dev` y `typecheck`), pero los tests corrian antes que
+  cualquiera de los tres: en una maquina recien clonada, el archivo no existia todavia y
+  el test que toca la configuracion moria con `Cannot find module`. Ahora `npm test`
+  genera el registro primero, igual que `typecheck`. Lo encontro el CI en el primer
+  commit con tests, que es exactamente para lo que estan.
+
 ## 1.4.0 — 2026-10-06
 
 ### Actualizar desde 1.3.6
