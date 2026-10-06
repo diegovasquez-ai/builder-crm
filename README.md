@@ -148,6 +148,12 @@ Cambios por version: [`CHANGELOG.md`](CHANGELOG.md). Secretos, roles y RLS:
 
 ## Licencia
 
-MIT. Nacio como fork de [auto-crm](https://github.com/Hainrixz/auto-crm) (MIT);
-la arquitectura de entrega para agencias toma ideas de
+**Propietaria.** Copyright (c) 2026 Diego Vásquez. Los miembros de IA Builder Lab
+pueden adaptarlo, desplegar instancias para sus clientes y cobrar por ellas; no
+pueden publicar el codigo ni redistribuirlo como plantilla o producto. Los terminos
+completos estan en [`LICENSE`](LICENSE).
+
+Nacio como fork de [auto-crm](https://github.com/Hainrixz/auto-crm), cuya licencia
+MIT se conserva en `LICENSE` para las partes que vienen de ahi. La arquitectura de
+entrega para agencias toma ideas de
 [vocero-crm](https://github.com/kevinrivm/vocero-crm).

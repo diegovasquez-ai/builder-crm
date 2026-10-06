@@ -4,6 +4,24 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 1.3.6 — 2026-10-06
+
+### Actualizar desde 1.3.5
+
+Trae esta version. No hay migraciones ni cambios de comportamiento: cambia la licencia.
+
+### Cambiado
+
+- **Builder CRM pasa a ser software propietario.** Copyright de Diego Vásquez. Los
+  miembros de IA Builder Lab pueden adaptarlo, desplegar instancias para sus clientes y
+  cobrar por ellas; no pueden publicar el codigo ni redistribuirlo como plantilla o
+  producto. Los terminos estan en `LICENSE` y el resumen en el README.
+- **Se conserva el aviso MIT de auto-crm**, el proyecto del que esto nacio como fork, en
+  una seccion aparte de `LICENSE`. No es cortesia: la licencia MIT permite relicenciar un
+  derivado, incluso como propietario, **siempre que su aviso de copyright viaje en las
+  copias**. Quitarlo seria incumplirla.
+- `package.json` declara `UNLICENSED`, que es como npm nombra al software propietario.
+
 ## 1.3.5 — 2026-10-05
 
 ### Actualizar desde 1.3.4

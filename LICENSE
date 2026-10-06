@@ -1,21 +1,75 @@
-MIT License
+Licencia de Builder CRM
 
-Copyright (c) 2026 Hainrixz
+Copyright (c) 2026 Diego Vásquez. Todos los derechos reservados.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Builder CRM es software propietario. Este archivo dice quien puede usarlo y para
+que. Si algo no esta permitido aqui, no esta permitido.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. QUIEN PUEDE USARLO
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+   Los miembros de IA Builder Lab, mientras su acceso a la comunidad este vigente.
+   El acceso al repositorio es personal: no se comparte, ni se cede, ni se publica.
+
+2. QUE PUEDEN HACER
+
+   a) Clonar el repositorio, modificarlo y adaptarlo.
+   b) Desplegar todas las instancias que quieran para sus propios clientes.
+   c) Cobrar por esas instancias, por el desarrollo y por el mantenimiento. El
+      trabajo que un miembro hace sobre una instancia es suyo.
+   d) Entregarle a un cliente la instancia desplegada y, si el encargo lo incluye,
+      el codigo de esa instancia, que queda sujeto a esta misma licencia.
+
+3. QUE NO PUEDEN HACER
+
+   a) Publicar el codigo, total o parcialmente, en un repositorio publico o en
+      cualquier otro lugar de acceso abierto.
+   b) Revender, regalar o redistribuir Builder CRM como plantilla, curso, producto
+      o parte de uno, con o sin modificaciones.
+   c) Dar acceso al codigo a quien no sea miembro de IA Builder Lab o cliente suyo
+      segun el punto 2.d.
+   d) Quitar este archivo o los avisos de autoria del codigo.
+
+4. SIN GARANTIA
+
+   EL SOFTWARE SE ENTREGA "TAL CUAL", SIN GARANTIA DE NINGUN TIPO, EXPRESA O
+   IMPLICITA, INCLUIDAS LAS DE COMERCIABILIDAD, IDONEIDAD PARA UN FIN DETERMINADO Y
+   NO INFRACCION. EN NINGUN CASO EL TITULAR DEL COPYRIGHT SERA RESPONSABLE DE NINGUNA
+   RECLAMACION, DANO U OTRA RESPONSABILIDAD, YA SEA EN UNA ACCION CONTRACTUAL,
+   EXTRACONTRACTUAL O DE OTRO TIPO, DERIVADA DEL SOFTWARE O DE SU USO.
+
+   Quien despliega una instancia para un cliente es responsable de esa instancia:
+   de sus datos, de sus credenciales y de lo que el agente de IA le responda a las
+   personas que escriben.
+
+5. SOFTWARE DE TERCEROS
+
+   Builder CRM nacio como un fork de auto-crm, que se distribuye bajo licencia MIT.
+   Esa licencia obliga a conservar su aviso de copyright en los derivados, y aqui
+   esta. Lo que sigue aplica a las partes que provienen de ese proyecto:
+
+   ---------------------------------------------------------------------------
+   MIT License
+
+   Copyright (c) 2026 Hainrixz
+
+   Permission is hereby granted, free of charge, to any person obtaining a copy
+   of this software and associated documentation files (the "Software"), to deal
+   in the Software without restriction, including without limitation the rights
+   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+   copies of the Software, and to permit persons to whom the Software is
+   furnished to do so, subject to the following conditions:
+
+   The above copyright notice and this permission notice shall be included in all
+   copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+   SOFTWARE.
+   ---------------------------------------------------------------------------
+
+   Las dependencias de npm (`package.json`) conservan cada una su propia licencia;
+   esta licencia no las cubre ni las modifica.

@@ -1,6 +1,6 @@
 {
   "name": "builder-crm",
-  "version": "1.3.5",
+  "version": "1.3.6",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -74,5 +74,5 @@
     "typescript": "^5"
   },
   "description": "CRM multicanal con agente de IA, para agencias que despliegan una instancia por cliente",
-  "license": "MIT"
+  "license": "UNLICENSED"
 }
