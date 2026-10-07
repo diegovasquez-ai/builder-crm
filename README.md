@@ -1,13 +1,9 @@
 # Builder CRM
 
-**CRM multicanal con agente de IA, hecho para entregarle una instancia propia a cada
-cliente.** Una bandeja para WhatsApp, Instagram y Messenger, un agente que califica
+**El CRM multicanal con agente de IA que los miembros de IA Builder Lab entregan a sus
+clientes.** Una bandeja para WhatsApp, Instagram y Messenger, un agente que califica
 leads y mueve el pipeline, y un arnes de Claude Code que adapta, despliega y prueba
-una instancia con un solo prompt.
-
-Codigo visible: cualquiera puede leerlo, clonarlo y usarlo en su propio negocio.
-Desplegar instancias para clientes y cobrar por ellas es de los miembros de IA Builder
-Lab (ver [LICENSE](LICENSE)).
+una instancia por cliente con un solo prompt.
 
 > *"Adapta Builder CRM para una inmobiliaria llamada Casa Sur, con modulo de
 > propiedades y agendamiento de visitas, y despliegalo en mi Coolify."*
@@ -154,12 +150,10 @@ Cambios por version: [`CHANGELOG.md`](CHANGELOG.md). Secretos, roles y RLS:
 
 ## Licencia
 
-**Codigo visible, propietario.** Copyright (c) 2026 Diego Vásquez.
-
-Cualquiera puede leerlo, clonarlo, correrlo y usarlo en su propio negocio. Desplegar
-instancias para clientes y cobrar por ellas es de los miembros de IA Builder Lab.
-Nadie puede revenderlo ni redistribuirlo como plantilla, curso o producto. Los
-terminos completos estan en [`LICENSE`](LICENSE).
+**Propietaria.** Copyright (c) 2026 Diego Vásquez. Los miembros de IA Builder Lab
+pueden adaptarlo, desplegar instancias para sus clientes y cobrar por ellas; no
+pueden publicar el codigo ni redistribuirlo como plantilla o producto. Los terminos
+completos estan en [`LICENSE`](LICENSE).
 
 Nacio como fork de [auto-crm](https://github.com/Hainrixz/auto-crm), cuya licencia
 MIT se conserva en `LICENSE` para las partes que vienen de ahi. La arquitectura de

@@ -4,6 +4,22 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 1.4.3 — 2026-10-07
+
+### Actualizar desde 1.4.2
+
+Trae esta version. Nada que hacer: solo cambia la licencia y el README.
+
+### Cambiado
+
+- **Vuelve la licencia a miembros de IA Builder Lab.** 1.4.2 habia abierto el uso a
+  cualquiera porque el repositorio iba a ser publico. El repositorio vuelve a ser privado,
+  asi que la licencia vuelve a la version de 1.3.6: usarlo es de los miembros, mientras su
+  acceso a la comunidad este vigente. El aviso MIT de auto-crm sigue en su seccion aparte,
+  intacto, porque esa licencia obliga a conservarlo en los derivados.
+- `package.json` vuelve a `"license": "UNLICENSED"`, y el README vuelve a presentarlo como
+  lo que es: el CRM que los miembros entregan a sus clientes.
+
 ## 1.4.2 — 2026-10-06
 
 ### Actualizar desde 1.4.1
