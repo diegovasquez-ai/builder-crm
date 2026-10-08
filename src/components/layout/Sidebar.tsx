@@ -21,6 +21,7 @@ import { marca, moduloActivo } from "@/lib/config";
 import { navModulos } from "@/lib/modules/cliente";
 import { etiquetaVersion } from "@/lib/version";
 import { useEsAdmin } from "@/lib/use-es-admin";
+import { leerConfigPublica } from "@/lib/config-publica";
 import { UserMenu } from "./UserMenu";
 
 interface NavItem {
@@ -176,6 +177,14 @@ export function SidebarFooter() {
       <div className="pt-2">
         <UserMenu />
       </div>
+      {leerConfigPublica().modoLocal && (
+        <p
+          className="mx-2.5 mt-2 rounded-md bg-amber-500/15 px-2 py-1.5 text-[10px] leading-tight text-amber-200"
+          title="Esto corre en tu maquina con una base embebida y sin sesion: no es una instancia para un cliente"
+        >
+          <span className="font-semibold">Modo local</span> · sin login, datos de prueba
+        </p>
+      )}
       <p className="px-2.5 pt-1 text-[10px] text-sidebar-foreground/40" title="Version desplegada">
         {etiquetaVersion()}
       </p>

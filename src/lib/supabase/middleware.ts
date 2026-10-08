@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { modoLocal } from "@/lib/modo-local";
 
 // `/correo` sirve las plantillas de los correos de acceso: las descarga el servidor de
 // autenticacion, que no tiene sesion en el CRM. Son plantillas vacias, sin datos.
@@ -18,6 +19,11 @@ const PUBLIC_API_PREFIXES = [
 ];
 
 export async function updateSession(request: NextRequest) {
+  // Modo local: no hay servidor de autenticacion al que preguntarle. Sin esta salida,
+  // `createServerClient` recibe undefined y TODA peticion muere antes de renderizar;
+  // eso es lo que hacia que el CRM no abriera sin un proyecto de Supabase.
+  if (modoLocal()) return NextResponse.next({ request });
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(

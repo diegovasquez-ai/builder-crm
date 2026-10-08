@@ -35,7 +35,7 @@ Cliente (WhatsApp/IG/Messenger) -> Zernio -> POST /api/webhooks/zernio
 | `src/lib/agent/` | Loop, prompt generico, registro de tools (nucleo + modulos), config por canal. |
 | `src/lib/modules/` | Tipos del contrato de modulo, registro generado, resolucion de rutas. |
 | `src/lib/reportes.ts`, `seed-demo.ts`, `simulador.ts` | Reportes reales, datos demo, simulador. |
-| `supabase/migrations/` | Migraciones del nucleo (base, RLS, primer admin). Las aplica `scripts/migrar.mjs`. |
+| `supabase/migrations/` | Migraciones del nucleo (base, RLS, primer admin). Las aplica `scripts/migrar.mjs`, y `scripts/local.mjs` las mismas sobre la base embebida. |
 | `scripts/` | migrar, crear-admin, seed-demo, verificar-instancia, zernio:*, generar-registro-modulos, pwa-icons. |
 
 ## Zonas: que se toca y que no
@@ -169,6 +169,17 @@ un segundo. Lo que necesita base o navegador se prueba con `verificar-instancia`
   no hay que marcar ninguna como build. El `Dockerfile` las sigue aceptando como build
   args para plataformas que las hornean. Nada de secretos en el codigo ni en `.mcp.json`
   (solo `.mcp.json.example`).
+- **El modo local apaga la autenticacion entera.** `npm run local` levanta un Postgres
+  embebido (`.local/db`) y entra sin sesion: quien abre la URL es admin. Por eso tiene
+  dos candados y el segundo es el que importa: `MODO_LOCAL=true` (lo pone solo ese
+  script) **y** `NODE_ENV` distinto de `production`, que no depende de configuracion y
+  hace imposible encenderlo en una imagen desplegada. Si se encendiera por error no
+  fallaria nada: el unico sintoma seria que cualquiera entra. Ver `src/lib/modo-local.ts`
+  y `specs/nucleo/10-modo-local.md`.
+- **`db.execute` devuelve cosas distintas segun el driver**: el array de filas con
+  `postgres`, `{ rows }` con el embebido. El proxy de `src/db/index.ts` lo normaliza en
+  modo local porque media docena de lugares hacen `resultado[0]`; sin eso los reportes
+  salen en cero sin un solo error.
 - **Datos demo** por `POST /api/seed/demo` (admin o `AGENT_WORKER_SECRET`): usan el
   conector `simulador` para que la demo responda; los reportes solo excluyen a los
   contactos creados desde `/simulador`.
@@ -179,7 +190,8 @@ un segundo. Lo que necesita base o navegador se prueba con `verificar-instancia`
 ## Comandos
 
 ```bash
-npm run dev                 # local (http://localhost:3000)
+npm run local               # probarlo sin cuentas: Postgres embebido + demo, sin login
+npm run dev                 # contra tu Supabase (http://localhost:3000)
 npm test                    # invariantes del nucleo (vitest, sin base ni red)
 npm run typecheck && npm run lint && npm run build
 npm run db:migrar           # aplica migraciones pendientes (nucleo + modulos activos)

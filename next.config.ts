@@ -13,7 +13,11 @@ const nextConfig: NextConfig = {
   // Standalone: la imagen Docker copia solo .next/standalone + static + public.
   // En Windows se desactiva porque el trazado usa symlinks que ahi fallan.
   output: process.platform === "win32" ? undefined : "standalone",
-  serverExternalPackages: ["postgres"],
+  // `postgres` es el driver de produccion. `@electric-sql/pglite` es el Postgres
+  // embebido del modo local y tiene que quedar fuera del bundle si o si: resuelve sus
+  // extensiones a partir de la ruta de su propio archivo, y el compilador la reescribe
+  // a un marcador (`file:///ROOT/...`) con el que no encuentra nada.
+  serverExternalPackages: ["postgres", "@electric-sql/pglite"],
   turbopack: {
     root: path.resolve("."),
   },

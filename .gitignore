@@ -54,3 +54,6 @@ Thumbs.db
 # correr typecheck (scripts/generar-registro-modulos.mjs). Versionarlo hacia que activar
 # un modulo ensuciara dos archivos de src/ (el nucleo) y chocara en cada actualizacion.
 /src/lib/modules/*.generated.ts
+
+# Modo local: base embebida y datos de prueba de la maquina de cada uno
+.local/

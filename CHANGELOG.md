@@ -4,6 +4,58 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 1.5.0 — 2026-10-08
+
+### Actualizar desde 1.4.3
+
+Trae esta version y corre `npm install` (entra una dependencia de desarrollo). No hay
+migraciones ni variables nuevas, y nada cambia en una instancia desplegada.
+
+### Agregado
+
+- **`npm run local`: el CRM corriendo en tu PC sin crear una cuenta en ningun lado.**
+  Clonar, `npm install`, `npm run local`, y el CRM abre con datos de demostracion. Sin
+  Supabase, sin Docker y sin ningun archivo `.env`. Levanta un Postgres embebido
+  (`@electric-sql/pglite`, un paquete de npm compilado a WebAssembly) en `.local/db`, le
+  agrega lo que Supabase trae de fabrica y un Postgres pelado no (los roles
+  `anon`/`authenticated`/`service_role`, el esquema `auth`, `auth.uid()` y `auth.users`),
+  aplica **las mismas migraciones** que una instancia desplegada con su RLS, da de alta
+  el administrador de la demo por el mismo disparador del primer admin que corre en
+  produccion, y carga la demo. Opciones: `--reset`, `--sin-datos`, `--puerto`.
+- **No hay login en modo local**, porque no hay servidor de autenticacion al que
+  preguntarle: quien abre la URL es administrador. El menu lateral lo dice, el boton de
+  cerrar sesion no aparece y `/api/health` informa `modoLocal`.
+
+### Arreglado
+
+- **El simulador se llevaba puesto el mensaje cuando el agente no podia contestar.** Sin
+  `OPENROUTER_API_KEY` cortaba antes de guardar nada, y con una clave vencida el
+  proveedor devolvia 401 y la ruta terminaba en 500. En los dos casos la persona veia
+  "Error" y su mensaje desaparecia de la pantalla, cuando el CRM habia hecho bien su
+  parte. Ahora el mensaje entra siempre —la conversacion aparece en la bandeja y el
+  contacto se crea— y la respuesta trae `agente.ok: false` con el motivo, que es lo que
+  la UI ya sabia mostrar. Esto tambien pasaba en una instancia desplegada.
+
+### Seguridad
+
+- El modo local apaga la autenticacion entera, asi que tiene dos candados y el segundo
+  es el que cuenta: hace falta `MODO_LOCAL=true`, que solo pone `npm run local`, **y**
+  que `NODE_ENV` no sea `production`. Lo segundo no depende de ninguna configuracion, de
+  modo que es imposible encenderlo en una imagen desplegada aunque alguien copie un
+  `.env` ajeno al servidor. Hay un test que lo cubre: si se encendiera por error no
+  fallaria nada y el unico sintoma seria que cualquiera entra.
+
+### Detalles que habrian fallado en silencio
+
+- `db.execute` devuelve el array de filas con el driver `postgres` y `{ rows }` con el
+  embebido, y media docena de lugares (reportes, equipo, automatizaciones, seed) hacen
+  `resultado[0]` sobre eso. Sin normalizarlo, en modo local los reportes salian en cero
+  sin un solo error. Se iguala en el proxy de `src/db/index.ts`.
+- `@electric-sql/pglite` resuelve sus extensiones desde la ruta de su propio archivo y el
+  compilador la reescribe a `file:///ROOT/...`: va en `serverExternalPackages`.
+- `DATABASE_URL` y las dos de Supabase dejan de contar como obligatorias en modo local.
+  Mientras contaban, `/api/health` respondia 503 y el CRM arrancaba pero no abria.
+
 ## 1.4.3 — 2026-10-07
 
 ### Actualizar desde 1.4.2

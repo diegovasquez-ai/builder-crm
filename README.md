@@ -34,21 +34,53 @@ una instancia por cliente con un solo prompt.
 
 ## Requisitos
 
-- Node.js 22 y npm. En Windows, clona en una ruta corta (`C:\proyectos\...`): con
-  carpetas muy anidadas, el compilador de Next falla por el limite de caracteres del
-  sistema de archivos.
-- Una cuenta de **Supabase** (un proyecto por cliente; el plan gratuito alcanza), o
-  tu propio Postgres mas GoTrue en el VPS (ver [`docs/SUPABASE-EN-VPS.md`](docs/SUPABASE-EN-VPS.md)).
+- Node.js 22 y npm. **Nada mas para probarlo**: el modo local trae su propia base.
+  En Windows, clona en una ruta corta (`C:\proyectos\...`): con carpetas muy
+  anidadas, el compilador de Next falla por el limite de caracteres del sistema de
+  archivos.
+- Para una instancia de verdad: una cuenta de **Supabase** (un proyecto por cliente;
+  el plan gratuito alcanza), o tu propio Postgres mas GoTrue en el VPS (ver
+  [`docs/SUPABASE-EN-VPS.md`](docs/SUPABASE-EN-VPS.md)).
 - Para desplegar: un VPS con **Coolify** y un dominio.
 - Opcional: **OpenRouter** (agente), **Zernio** (canales), bucket S3 (documentos).
 - **Claude Code** con el repo abierto; ver [`CLAUDE.md`](CLAUDE.md) y
   [`docs/MCP.md`](docs/MCP.md).
 
-## Funcionando en 15 minutos (local)
+## Probarlo en tu PC (2 minutos, sin crear ninguna cuenta)
 
 ```bash
 git clone https://github.com/diegovasquez-ai/builder-crm.git && cd builder-crm
 npm install
+npm run local
+```
+
+Y ya esta: `http://localhost:3000` con el CRM lleno de datos de demostracion. No hace
+falta Supabase, ni Docker, ni un archivo `.env`.
+
+`npm run local` levanta un **Postgres embebido** (un paquete de npm compilado a
+WebAssembly, guardado en `.local/db`), aplica las mismas migraciones que una instancia
+desplegada —con su RLS—, carga los datos demo y abre el CRM. **No hay login**: en modo
+local no hay servidor de autenticacion, asi que entras directo como administrador y el
+menu lateral te lo recuerda.
+
+| | |
+|---|---|
+| `npm run local -- --reset` | borra la base local y empieza de cero |
+| `npm run local -- --sin-datos` | sin datos de demostracion |
+| `npm run local -- --puerto 3001` | otro puerto |
+
+Para que el **agente responda** en el simulador hace falta una clave de OpenRouter:
+copia `.env.example` a `.env.local` y pone `OPENROUTER_API_KEY`. Sin ella el CRM
+funciona igual (los mensajes entran a la bandeja y crean el contacto), solo que nadie
+contesta del otro lado.
+
+Lo que el modo local **no** tiene, porque necesita una instancia de verdad: login,
+equipo con roles, invitaciones por correo y la busqueda semantica del modulo
+propiedades (el Postgres embebido no trae pgvector).
+
+## Con tu propio Supabase (para adaptar y desplegar)
+
+```bash
 cp .env.example .env.local        # completar al menos Supabase (4 variables)
 npm run db:migrar                 # crea tablas, RLS y el trigger del primer admin
 npm run dev                       # http://localhost:3000
@@ -109,6 +141,7 @@ modules/           modulos (ejemplo, propiedades, visitas, _plantilla)
 public/marca/      logo e icono del cliente
 specs/             constitucion, plantilla de spec, specs del nucleo y del cliente
 tests/             invariantes que fallan en silencio (firma, ventana 24h, roles)
+.local/            base embebida del modo local (no se versiona)
 src/               nucleo (app, lib, components, db)
 supabase/          migraciones del nucleo (base, RLS, primer admin)
 scripts/           migrar, crear-admin, seed-demo, verificar-instancia, zernio:*
@@ -121,7 +154,8 @@ docs/              MCP, agente, Zernio, Supabase en tu VPS, entrar con Google, c
 
 | Comando | Que hace |
 |---|---|
-| `npm run dev` / `build` / `start` | desarrollo, build, servidor |
+| `npm run local` | **probarlo en tu PC sin cuentas**: Postgres embebido, datos demo, sin login |
+| `npm run dev` / `build` / `start` | desarrollo contra tu Supabase, build, servidor |
 | `npm test` | invariantes del nucleo (vitest, sin base ni red, ~1 s) |
 | `npm run typecheck` / `lint` | gate tecnico (CI corre los tres + build) |
 | `npm run db:migrar` / `db:status` | migraciones del nucleo + modulos activos |

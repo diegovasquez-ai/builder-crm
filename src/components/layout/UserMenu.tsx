@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 import { ChevronsUpDown, LogOut, Settings, User as UserIcon } from "lucide-react";
 import Link from "next/link";
 import { signOut } from "@/app/login/actions";
+import { leerConfigPublica } from "@/lib/config-publica";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -119,14 +120,20 @@ export function UserMenu() {
           <Settings className="h-4 w-4" />
           Configuracion
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => startTransition(() => signOut())}
-          className="text-destructive focus:text-destructive"
-        >
-          <LogOut className="h-4 w-4" />
-          Cerrar sesion
-        </DropdownMenuItem>
+        {/* En modo local no hay sesion: el boton no tendria a donde ir y dejaria la
+            pantalla en blanco. */}
+        {!leerConfigPublica().modoLocal && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => startTransition(() => signOut())}
+              className="text-destructive focus:text-destructive"
+            >
+              <LogOut className="h-4 w-4" />
+              Cerrar sesion
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { contacts, teamMembers } from "@/db/schema";
 import { asc, eq, type SQL } from "drizzle-orm";
 import { createClient } from "@/lib/supabase/server";
+import { ID_MIEMBRO_LOCAL, modoLocal } from "@/lib/modo-local";
 
 /**
  * Equipo y visibilidad.
@@ -47,6 +48,18 @@ function toMember(row: typeof teamMembers.$inferSelect): TeamMember {
  * trata como no autorizado.
  */
 export async function getCurrentMember(): Promise<TeamMember | null> {
+  // Modo local: no hay sesion que leer. El administrador de mentira lo crea
+  // `npm run local` por el mismo camino que el primer admin de una instancia real (el
+  // disparador sobre auth.users), asi que se lee de la base como cualquier otro.
+  if (modoLocal()) {
+    const [row] = await db
+      .select()
+      .from(teamMembers)
+      .where(eq(teamMembers.id, ID_MIEMBRO_LOCAL))
+      .limit(1);
+    return row ? toMember(row) : null;
+  }
+
   const supabase = await createClient();
   const {
     data: { user },

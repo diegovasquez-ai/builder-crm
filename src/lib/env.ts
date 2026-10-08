@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { modoLocal } from "@/lib/modo-local";
 
 /**
  * Variables de entorno, validadas una sola vez y bajo demanda (no al importar: el build
@@ -91,10 +92,23 @@ export function getEnv(): Env {
 }
 
 /** Nombres de las variables obligatorias que faltan o son invalidas (sin valores). */
+/**
+ * En modo local estas tres no van, y no es un descuido: la base es embebida y no hay
+ * servidor de autenticacion. Si siguieran siendo obligatorias, /api/health contestaria
+ * 503 para siempre y el CRM no abriria, que es justo lo que el modo local viene a
+ * arreglar.
+ */
+const NO_HACEN_FALTA_EN_LOCAL = [
+  "DATABASE_URL",
+  "NEXT_PUBLIC_SUPABASE_URL",
+  "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+];
+
 export function envFaltantes(): string[] {
   const resultado = esquemaEnv.safeParse(process.env);
   if (resultado.success) return [];
-  return [...new Set(resultado.error.issues.map((i) => String(i.path[0])))];
+  const nombres = [...new Set(resultado.error.issues.map((i) => String(i.path[0])))];
+  return modoLocal() ? nombres.filter((n) => !NO_HACEN_FALTA_EN_LOCAL.includes(n)) : nombres;
 }
 
 /** Capacidades encendidas segun el entorno. Lo usa la UI para avisar que falta. */

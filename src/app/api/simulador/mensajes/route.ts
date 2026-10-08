@@ -20,16 +20,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "conversationId y texto son requeridos" }, { status: 400 });
   }
 
+  // Que el agente no pueda contestar NO es un error de esta ruta: el mensaje entro al
+  // CRM igual y vuelve en la respuesta con `agente.ok === false` y el motivo. Aca solo
+  // quedan los dos casos en que no hay nada que simular.
   const r = await enviarMensajeSimulado({ conversationId, texto: texto.slice(0, 4000) });
   if ("error" in r) {
-    const status = r.error === "no_encontrada" ? 404 : r.error === "agente_no_configurado" ? 503 : 400;
     const mensaje =
-      r.error === "agente_no_configurado"
-        ? "Falta OPENROUTER_API_KEY: el agente no puede responder."
-        : r.error === "no_simulada"
-          ? "Esa conversacion no es del simulador."
-          : "Conversacion no encontrada.";
-    return NextResponse.json({ error: r.error, mensaje }, { status });
+      r.error === "no_simulada" ? "Esa conversacion no es del simulador." : "Conversacion no encontrada.";
+    return NextResponse.json({ error: r.error, mensaje }, { status: r.error === "no_encontrada" ? 404 : 400 });
   }
   return NextResponse.json(r);
 }

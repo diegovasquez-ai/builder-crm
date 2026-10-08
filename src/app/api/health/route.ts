@@ -3,6 +3,7 @@ import { sql } from "drizzle-orm";
 import { APP_VERSION, BUILD_COMMIT } from "@/lib/version";
 import { envFaltantes } from "@/lib/env";
 import { erroresConfig } from "@/lib/config";
+import { modoLocal } from "@/lib/modo-local";
 import { correoDeAccesoActivo } from "@/lib/auth-correo";
 
 export const dynamic = "force-dynamic";
@@ -53,5 +54,7 @@ export async function GET() {
     commit: BUILD_COMMIT,
     db: "ok",
     correo: correoDeAccesoActivo(),
+    // Para que nadie confunda una instancia de verdad con alguien probandolo en su PC.
+    modoLocal: modoLocal(),
   });
 }

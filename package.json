@@ -1,6 +1,6 @@
 {
   "name": "builder-crm",
-  "version": "1.4.3",
+  "version": "1.5.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -26,7 +26,8 @@
     "modulos:registro": "node scripts/generar-registro-modulos.mjs",
     "verificar": "node scripts/verificar-instancia.mjs",
     "auth:preparar": "node scripts/preparar-auth-autoalojado.mjs",
-    "claves:supabase": "node scripts/generar-claves-supabase.mjs"
+    "claves:supabase": "node scripts/generar-claves-supabase.mjs",
+    "local": "node scripts/local.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.82.0",
@@ -62,6 +63,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^22.20.5",
     "@types/react": "^19",

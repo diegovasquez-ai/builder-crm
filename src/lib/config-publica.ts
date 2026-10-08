@@ -1,3 +1,5 @@
+import { modoLocal } from "@/lib/modo-local";
+
 /**
  * Configuracion publica que necesita el navegador, servida en tiempo de EJECUCION.
  *
@@ -22,6 +24,12 @@ export interface ConfigPublica {
    * capacidad: la UI necesita saberlo para no ofrecer un boton que no hace nada.
    */
   authEnviaCorreos: boolean;
+  /**
+   * El CRM corre en la maquina de alguien con la base embebida y sin sesion (ver
+   * src/lib/modo-local.ts). El navegador lo necesita para avisar que esto no es una
+   * instancia de verdad y para no ofrecer "cerrar sesion", que no tendria a donde ir.
+   */
+  modoLocal: boolean;
 }
 
 /** `AUTH_ENVIA_CORREOS=true`. Se aceptan las formas de siempre para no pelear con ellas. */
@@ -36,6 +44,7 @@ export function configPublica(): ConfigPublica {
     supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
     supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
     authEnviaCorreos: leerBooleano(process.env.AUTH_ENVIA_CORREOS),
+    modoLocal: modoLocal(),
   };
 }
 
@@ -51,11 +60,14 @@ export function leerConfigPublica(): ConfigPublica {
     if (bloque) {
       try {
         const datos = JSON.parse(bloque) as Partial<ConfigPublica>;
-        if (datos.supabaseUrl && datos.supabaseAnonKey) {
+        // En modo local no hay URL ni clave de Supabase, y el bloque vale igual: es
+        // justamente el que le dice al navegador que esta en modo local.
+        if (datos.modoLocal === true || (datos.supabaseUrl && datos.supabaseAnonKey)) {
           return {
-            supabaseUrl: datos.supabaseUrl,
-            supabaseAnonKey: datos.supabaseAnonKey,
+            supabaseUrl: datos.supabaseUrl ?? "",
+            supabaseAnonKey: datos.supabaseAnonKey ?? "",
             authEnviaCorreos: datos.authEnviaCorreos === true,
+            modoLocal: datos.modoLocal === true,
           };
         }
       } catch {

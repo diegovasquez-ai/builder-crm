@@ -20,10 +20,11 @@
 // Conexion: DIRECT_URL si existe (conexion directa, puerto 5432), si no DATABASE_URL.
 // El pooler en modo transaccion tambien sirve: no se usan prepared statements.
 
-import { readdirSync, readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import postgres from "postgres";
+import { listarMigraciones } from "./lib/migraciones.mjs";
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -48,33 +49,7 @@ if (!url) {
   process.exit(1);
 }
 
-function listarSql(dir, prefijo) {
-  if (!existsSync(dir)) return [];
-  return readdirSync(dir)
-    .filter((f) => f.endsWith(".sql"))
-    .sort()
-    .map((f) => ({ nombre: `${prefijo}${f}`, ruta: join(dir, f) }));
-}
-
-// Modulos activos: config/modulos.json (la misma lista que lee config/cliente.ts).
-function modulosActivos() {
-  const archivo = join(raiz, "config", "modulos.json");
-  if (!existsSync(archivo)) return [];
-  try {
-    const json = JSON.parse(readFileSync(archivo, "utf8"));
-    const lista = Array.isArray(json?.activos) ? json.activos : [];
-    return lista.filter((m) => typeof m === "string" && /^[a-z][a-z0-9_]*$/.test(m));
-  } catch {
-    return [];
-  }
-}
-
-const archivos = [
-  ...listarSql(join(raiz, "supabase", "migrations"), ""),
-  ...modulosActivos().flatMap((m) =>
-    listarSql(join(raiz, "modules", m, "migrations"), `modules/${m}/`)
-  ),
-];
+const archivos = listarMigraciones(raiz);
 
 async function conectar() {
   const intentos = 15;
