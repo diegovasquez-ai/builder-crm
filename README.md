@@ -98,7 +98,15 @@ Sin interfaz: `npm run admin:crear -- --email a@b.com --password 'xxxxxxxx'`.
 
 Resumen (el detalle paso a paso esta en la skill `deploy-coolify`):
 
-1. Proyecto Supabase -> `npm run db:migrar` y `npm run admin:crear` desde tu maquina.
+1. Base y Auth. Dos caminos y conviene elegir antes de empezar:
+   - **Supabase cloud**, un proyecto por cliente. Mas rapido, con panel y respaldos; el
+     plan gratuito pausa los proyectos inactivos.
+   - **Autoalojados en el mismo Coolify** (Postgres + GoTrue): sin cuenta de Supabase,
+     sin pausas y sin costo por cliente, pero los respaldos son tuyos. Es el camino de
+     la instancia de demostracion. Guia:
+     [`docs/SUPABASE-EN-VPS.md`](docs/SUPABASE-EN-VPS.md).
+
+   Despues, desde tu maquina: `npm run db:migrar` y `npm run admin:crear`.
 2. En Coolify: aplicacion desde el repo (build pack **Dockerfile**, puerto 3000,
    dominio) y las variables de [`.env.example`](.env.example), **todas en runtime**. No
    hace falta marcar ninguna como "Build Variable": desde 1.2.2 el servidor le pasa al

@@ -4,6 +4,28 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 1.5.1 — 2026-10-08
+
+### Actualizar desde 1.5.0
+
+Trae esta version. Solo cambian el arnes y la documentacion.
+
+### Arreglado
+
+- **La skill `deploy-coolify` daba por hecho Supabase cloud.** Creaba un proyecto en
+  supabase.com por MCP y no mencionaba una sola vez `docs/SUPABASE-EN-VPS.md`, aunque el
+  CRM solo usa Supabase para Postgres y GoTrue y los dos se pueden autoalojar en el mismo
+  Coolify, que es como corre la instancia de demostracion. Ahora el paso 1 plantea los dos
+  caminos con sus costos (cloud pausa los proyectos inactivos; autoalojado deja los
+  respaldos de tu lado) y, para el autoalojado, da el orden de pasos que no es obvio:
+  base, `npm run claves:supabase`, `npm run auth:preparar`, GoTrue, y recien ahi
+  `npm run db:migrar`, porque la ultima migracion pone un disparador sobre `auth.users`.
+- **La misma skill mandaba marcar variables como `is_build_time: true`.** Quedo obsoleto
+  en 1.2.2, cuando la configuracion publica paso a servirse en ejecucion, y ademas la API
+  de Coolify 4.3 rechaza ese campo: seguir la instruccion al pie fallaba. Ahora dice que
+  van todas en runtime y por que.
+- El README resume los dos caminos en el paso 1 de "Desplegar en Coolify".
+
 ## 1.5.0 — 2026-10-08
 
 ### Actualizar desde 1.4.3

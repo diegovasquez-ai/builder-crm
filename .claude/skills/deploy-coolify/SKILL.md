@@ -1,10 +1,11 @@
 ---
 name: deploy-coolify
 description: |
-  Despliega una instancia nueva de Builder CRM de principio a fin: proyecto Supabase,
-  migraciones, primer admin, aplicacion en Coolify (Dockerfile) con sus variables, deploy,
-  health check y datos demo. Activar cuando el usuario dice: despliega, deploy, subilo a
-  Coolify, levanta la instancia, ponlo en produccion, crea el proyecto de Supabase.
+  Despliega una instancia nueva de Builder CRM de principio a fin: base y Auth (Supabase
+  cloud o autoalojados en el mismo Coolify), migraciones, primer admin, aplicacion en
+  Coolify (Dockerfile) con sus variables, deploy, health check y datos demo. Activar
+  cuando el usuario dice: despliega, deploy, subilo a Coolify, levanta la instancia,
+  ponlo en produccion, crea el proyecto de Supabase.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
@@ -21,7 +22,7 @@ iniciar sesion con la cuenta admin creada, y la demo esta cargada.
 |---|---|---|
 | **Dominio** con registro A al VPS | DNS del cliente | `APP_BASE_URL` y el dominio de la app |
 | **Coolify** URL + API token (scope de escritura) | Coolify -> Keys & Tokens -> API tokens | crear la app, variables y deploy |
-| **Supabase** Personal Access Token (o un proyecto ya creado) | supabase.com/dashboard/account/tokens | crear el proyecto y leer sus claves |
+| **Base y Auth**: o un Personal Access Token de Supabase cloud, o nada (se autoalojan en el mismo Coolify) | supabase.com/dashboard/account/tokens, o el propio Coolify | ver el paso 1: hay que elegir antes de empezar |
 | **OpenRouter** API key (opcional) | openrouter.ai -> Keys | el agente |
 | **Zernio** (opcional, despues) | zernio.com -> Settings -> API Keys | canales |
 
@@ -32,7 +33,17 @@ Genera tu mismo los secretos que no vienen de un proveedor:
 
 Nunca pegues secretos en el chat de vuelta, en el repo ni en `.mcp.json`.
 
-## 1. Supabase
+## 1. Base y Auth: dos caminos, hay que elegir antes de empezar
+
+El CRM usa Supabase para **dos cosas separadas**: Postgres (los datos) y GoTrue (quien
+inicia sesion). No usa nada mas de Supabase. Por eso hay dos caminos validos, y el
+primer paso es preguntarle al miembro cual quiere.
+
+### A) Supabase cloud (un proyecto por cliente)
+
+Mas rapido de levantar y con respaldos y panel incluidos. El plan gratuito alcanza, pero
+**pausa los proyectos inactivos**, y un CRM de un cliente que se pausa es una llamada a
+las 9 de la manana.
 
 Con el MCP de Supabase en **modo cuenta** (sin `project_ref`): `list_organizations`,
 `get_cost`/`confirm_cost`, `create_project` (region cercana al cliente, contrasena de
@@ -44,6 +55,32 @@ Obtener: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 -> Settings -> API; no lo expone el MCP por diseno: pedirlo), `DATABASE_URL` (Connect
 -> Transaction pooler, puerto 6543) y `DIRECT_URL` (Session/direct, 5432, para
 migraciones).
+
+### B) Autoalojado en el mismo Coolify (Postgres + GoTrue)
+
+Todo en el VPS del miembro: sin cuenta de Supabase, sin pausas y sin costo por cliente.
+**Es el camino de la instancia de demostracion de IA Builder Lab.** A cambio, los
+respaldos y las actualizaciones son suyos.
+
+Guia completa, con las variables de GoTrue y lo que se rompe si se saltea un paso:
+[`docs/SUPABASE-EN-VPS.md`](../../../docs/SUPABASE-EN-VPS.md). El orden importa y no es
+obvio:
+
+1. Base Postgres gestionada en Coolify (imagen `pgvector/pgvector:pg16` si se va a usar
+   el modulo propiedades).
+2. `npm run claves:supabase` genera el secreto JWT y las claves anonima y de servicio
+   coherentes entre si. **No van a ningun repo.**
+3. `npm run auth:preparar` crea en esa base lo que Supabase trae de fabrica y un
+   Postgres pelado no: los roles `anon` / `authenticated` / `service_role`, el esquema
+   `auth` con su dueno `supabase_auth_admin` y las funciones `auth.uid()` y companhia.
+   Va **antes** de arrancar GoTrue, que espera encontrar ese rol.
+4. GoTrue como aplicacion en Coolify, con su dominio. Al arrancar crea `auth.users` con
+   sus propias migraciones.
+5. Recien ahi `npm run db:migrar`, porque la ultima migracion pone un disparador sobre
+   `auth.users`.
+
+`NEXT_PUBLIC_SUPABASE_URL` es el dominio de GoTrue **incluyendo `/auth/v1`**, para que el
+proxy recorte el prefijo.
 
 ## 2. Migraciones y primer admin (desde la maquina del miembro)
 
@@ -71,15 +108,19 @@ de Coolify v4 es de solo lectura) o la **REST API** con `curl`
    `environment_name` (production), `git_repository`, `git_branch` (main),
    `build_pack: "dockerfile"`, `ports_exposes: "3000"`, `domains: "https://<dominio>"`,
    `instant_deploy: false`.
-3. **Variables** (`POST /api/v1/applications/<uuid>/envs/bulk`):
-   - Build args (marcar `is_build_time: true`): `NEXT_PUBLIC_SUPABASE_URL`,
-     `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL`,
-     `NEXT_PUBLIC_VAPID_PUBLIC_KEY`.
-   - Runtime: `DATABASE_URL`, `DIRECT_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
-     `APP_BASE_URL`, `AGENT_WORKER_SECRET`, `LEADS_WEBHOOK_SECRET`,
-     `OPENROUTER_API_KEY`, `AGENT_MODEL` (opcional), `VAPID_PRIVATE_KEY`,
-     `VAPID_SUBJECT`, y las de Zernio/S3 si ya existen. Lista completa y explicada en
-     `.env.example`.
+3. **Variables** (`POST /api/v1/applications/<uuid>/envs/bulk`): **todas en runtime, sin
+   excepcion**. Desde 1.2.2 el servidor le pasa al navegador la configuracion publica en
+   tiempo de ejecucion (`src/lib/config-publica.ts`), asi que ninguna `NEXT_PUBLIC_*`
+   necesita hornearse en el build. No intentes marcarlas como de build: la API de
+   Coolify 4.3 **rechaza el campo `is_build_time`** y solo se puede hacer desde la
+   interfaz.
+
+   `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL`,
+   `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `DATABASE_URL`, `DIRECT_URL`,
+   `SUPABASE_SERVICE_ROLE_KEY`, `APP_BASE_URL`, `AGENT_WORKER_SECRET`,
+   `LEADS_WEBHOOK_SECRET`, `OPENROUTER_API_KEY`, `AGENT_MODEL` (opcional),
+   `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, y las de Zernio/S3 si ya existen. Lista
+   completa y explicada en `.env.example`.
 4. **Deploy**: `POST /api/v1/deploy?uuid=<uuid>`; sigue `GET /api/v1/deployments/<id>`
    hasta `finished`. Las migraciones corren solas al arrancar (entrypoint).
 5. **Health**: `curl https://<dominio>/api/health` -> `ok: true` con `version`. Si
