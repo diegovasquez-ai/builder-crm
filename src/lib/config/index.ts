@@ -67,6 +67,11 @@ export function etiquetaAsesor(): string {
   return getConfig().roles.etiquetaAsesor;
 }
 
+/** Zona horaria IANA de la instancia. Ver `specs/nucleo/11-zona-horaria.md`. */
+export function zonaHoraria(): string {
+  return getConfig().zonaHoraria;
+}
+
 /** true si una funcion del nucleo o un modulo de `modules/` esta activo. */
 export function moduloActivo(nombre: string): boolean {
   const { modulos } = getConfig();

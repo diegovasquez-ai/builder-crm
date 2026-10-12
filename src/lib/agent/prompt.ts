@@ -78,9 +78,12 @@ export const getGlobalSystemPromptTemplate = getSystemPromptTemplate;
 export function renderSystemPrompt(template: string, opts: { now?: Date; channel?: string } = {}): string {
   const now = opts.now ?? new Date();
   const channel = opts.channel ?? "whatsapp";
-  const { marca, agente, idioma } = getConfig();
+  const { marca, agente, idioma, zonaHoraria } = getConfig();
 
+  // La zona es la del negocio, no la del proceso: el contenedor corre en UTC, y sin esto
+  // el agente le dice "manana" al cliente que escribe de noche.
   const fecha = now.toLocaleDateString(idioma === "en" ? "en-US" : "es", {
+    timeZone: zonaHoraria,
     weekday: "long",
     year: "numeric",
     month: "long",

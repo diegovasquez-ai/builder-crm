@@ -29,7 +29,9 @@ termina con "listo para desplegar". Sigue los pasos en orden; cada paso deja un 
 ## 1. Entender (maximo 3 preguntas, todas juntas)
 
 Lee el brief y resuelve con sentido comun. Pregunta SOLO si falta algo critico y
-agrupa las preguntas en un unico mensaje. Lo tipico que hace falta:
+agrupa las preguntas en un unico mensaje. `specs/_brief.md` es el cuestionario completo:
+si el brief viene muy flaco, pasale ese archivo al miembro en vez de interrogarlo por
+chat. Lo tipico que hace falta:
 
 1. **Nombre del cliente y nicho** (inmobiliaria, clinica, tienda...). Si existe
    `config/plantillas/<nicho>.ts`, parte de ahi.

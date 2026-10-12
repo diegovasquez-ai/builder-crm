@@ -57,7 +57,7 @@ de propiedades y agendamiento de visitas, y despliegalo en mi Coolify."*
 
 | Paso | Que pasa | Skill |
 |---|---|---|
-| 1. Entender | Leer el brief; maximo 3 preguntas si falta algo critico (dominio, credenciales, nicho). | `adaptar-a-cliente` |
+| 1. Entender | Leer el brief ([`specs/_brief.md`](specs/_brief.md) es que preguntarle al cliente); maximo 3 preguntas si falta algo critico (dominio, credenciales, nicho). | `adaptar-a-cliente` |
 | 2. Especificar | `specs/<cliente>/spec.md` desde `specs/_plantilla.md`. | `adaptar-a-cliente` |
 | 3. Configurar | `config/cliente.ts` (desde una plantilla de `config/plantillas/` o desde cero), `config/modulos.json`, `public/marca/`, `npm run pwa:icons`. | `adaptar-a-cliente` |
 | 4. Construir | Modulos nuevos en `modules/` que la spec requiera. | `crear-modulo` |
@@ -122,6 +122,14 @@ un segundo. Lo que necesita base o navegador se prueba con `verificar-instancia`
   IG/Messenger fuera de ventana van con `HUMAN_AGENT`; WhatsApp solo con plantilla.
 - **Pausa del agente**: por conversacion (`PATCH /api/conversations/:id/agente`);
   el contacto tiene ademas un kill-switch global. `derivar_asesor` pausa solo el hilo.
+- **El proceso corre en UTC; la zona horaria sale de la configuracion.** El contenedor no
+  define `TZ` a proposito: una imagen compartida por muchas instancias no puede traer la
+  zona horneada. Por eso `config.zonaHoraria` (IANA, default `UTC`) es la que manda, y
+  todo lo que resuelva un dia o una hora tiene que pasarsela a `Intl`: el prompt del
+  agente (`{{fecha}}`) y `formatDate` / `formatRelativeDate` ya lo hacen. Si se omite, el
+  sintoma no es un error sino un agente que nombra el dia equivocado de noche, y en la
+  maquina de un miembro chileno no se reproduce. Los tests corren tambien con `TZ=UTC`
+  por eso. Ver `specs/nucleo/11-zona-horaria.md`.
 - **Nunca pasar un `Date` dentro de `db.execute(sql\`...\`)`.** Ese camino llega al
   driver por `unsafe()`, que no serializa fechas, y la consulta muere con
   `ERR_INVALID_ARG_TYPE` antes de salir. En SQL crudo las fechas van como texto ISO con

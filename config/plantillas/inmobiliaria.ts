@@ -28,6 +28,7 @@ export const plantillaInmobiliaria: ConfigClienteEntrada = {
 
   idioma: "es",
   moneda: "USD",
+  zonaHoraria: "America/Santiago",
 
   roles: { etiquetaAsesor: "Asesor" },
 

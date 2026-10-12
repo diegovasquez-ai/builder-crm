@@ -27,6 +27,9 @@ export default definirConfig({
 
   idioma: "es",
   moneda: "USD",
+  // La del negocio del cliente, no la tuya: decide el dia que el agente le nombra a
+  // quien escribe de noche. America/Mexico_City, America/Bogota, Europe/Madrid...
+  zonaHoraria: "America/Santiago",
 
   roles: {
     etiquetaAsesor: "Asesor",

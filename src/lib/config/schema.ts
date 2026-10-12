@@ -17,6 +17,26 @@ const clave = z
   .min(1)
   .regex(/^[a-z][a-z0-9_]*$/, "Clave en snake_case, empieza con letra (ej. tipo_operacion)");
 
+/**
+ * Zona horaria IANA. Se valida contra el propio entorno (`Intl` existe igual en Node y
+ * en el navegador) porque una zona mal escrita no falla sola: `Intl` la rechaza al
+ * formatear y el error aparece lejos de aqui, o peor, alguien la captura y la fecha sale
+ * en UTC sin que nadie se entere.
+ */
+const zonaIana = z
+  .string()
+  .min(1)
+  .superRefine((valor, ctx) => {
+    try {
+      new Intl.DateTimeFormat("en-US", { timeZone: valor });
+    } catch {
+      ctx.addIssue({
+        code: "custom",
+        message: `zona horaria desconocida: "${valor}". Va un identificador IANA, como America/Santiago, America/Mexico_City o Europe/Madrid`,
+      });
+    }
+  });
+
 export const esquemaMarca = z.object({
   /** Nombre completo: pestana, login, sidebar, X-Title del agente. */
   nombre: z.string().min(1).max(60),
@@ -113,6 +133,16 @@ export const esquemaConfig = z.object({
   idioma: z.enum(["es", "en"]).default("es"),
   /** Codigo ISO 4217 para formatear montos. */
   moneda: z.string().length(3).default("USD"),
+  /**
+   * Zona horaria del negocio: con que zona se resuelve el dia y la hora, en pantalla y
+   * en el prompt del agente. El proceso corre en UTC a proposito (una imagen compartida
+   * por muchas instancias no puede traer la zona horneada), asi que sin esto el agente
+   * nombra el dia equivocado de noche. Ver `specs/nucleo/11-zona-horaria.md`.
+   *
+   * El default es UTC para no mover las fechas de una instancia ya desplegada que
+   * actualice el nucleo sin tocar su configuracion.
+   */
+  zonaHoraria: zonaIana.default("UTC"),
   roles: z
     .object({
       /** Como se llama al rol `asesor` en pantalla (Asesor, Agente, Vendedor...). */

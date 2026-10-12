@@ -96,6 +96,24 @@ describe("esquema de config/cliente.ts", () => {
     expect(r.success).toBe(false);
   });
 
+  it("acepta una zona horaria IANA y usa UTC si no se declara", () => {
+    // UTC por default a proposito: una instancia ya desplegada que actualiza el nucleo
+    // sin tocar su configuracion sigue viendo las mismas fechas que antes.
+    expect(esquemaConfig.safeParse(BASE).data?.zonaHoraria).toBe("UTC");
+    const r = esquemaConfig.safeParse({ ...BASE, zonaHoraria: "America/Mexico_City" });
+    expect(r.success).toBe(true);
+  });
+
+  it("rechaza una zona horaria mal escrita", () => {
+    // Es la clase de error que no avisa: Intl la rechaza al formatear, lejos de aqui, y
+    // el sintoma es un agente que nombra el dia equivocado.
+    const r = esquemaConfig.safeParse({ ...BASE, zonaHoraria: "America/Santigo" });
+    expect(r.success).toBe(false);
+    if (!r.success) {
+      expect(r.error.issues[0].message).toContain("America/Santigo");
+    }
+  });
+
   it("explica donde esta el problema, no solo que lo hay", () => {
     const r = esquemaConfig.safeParse({ ...BASE, marca: { nombreCorto: "Norte" } });
     expect(r.success).toBe(false);

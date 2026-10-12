@@ -54,21 +54,39 @@ export function formatDate(date: Date | number | null): string {
   if (!date) return "-";
   const d = toDate(date);
   return new Intl.DateTimeFormat("es-MX", {
+    timeZone: getConfig().zonaHoraria,
     day: "numeric",
     month: "short",
     year: "numeric",
   }).format(d);
 }
 
+/** Dia calendario en la zona de la instancia, como "2026-10-12". */
+function diaLocal(d: Date): string {
+  const partes = new Intl.DateTimeFormat("en-US", {
+    timeZone: getConfig().zonaHoraria,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(d);
+  const parte = (tipo: string) => partes.find((p) => p.type === tipo)?.value ?? "";
+  return `${parte("year")}-${parte("month")}-${parte("day")}`;
+}
+
 export function formatRelativeDate(date: Date | number): string {
   const d = toDate(date);
-  const now = new Date();
-  const diffMs = now.getTime() - d.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  // "Hoy" y "Ayer" son dias del calendario, no ventanas de 24 h: a las 00:30 algo de las
+  // 23:00 es de ayer aunque hayan pasado 90 minutos. Se comparan los dias en la zona de
+  // la instancia para que la misma fila no diga una cosa en el servidor y otra en el
+  // navegador.
+  const dias = Math.round(
+    (Date.parse(`${diaLocal(new Date())}T00:00:00Z`) - Date.parse(`${diaLocal(d)}T00:00:00Z`)) /
+      86_400_000
+  );
 
-  if (diffDays === 0) return "Hoy";
-  if (diffDays === 1) return "Ayer";
-  if (diffDays < 7) return `Hace ${diffDays} dias`;
-  if (diffDays < 30) return `Hace ${Math.floor(diffDays / 7)} semanas`;
+  if (dias <= 0) return "Hoy";
+  if (dias === 1) return "Ayer";
+  if (dias < 7) return `Hace ${dias} dias`;
+  if (dias < 30) return `Hace ${Math.floor(dias / 7)} semanas`;
   return formatDate(date);
 }
