@@ -4,6 +4,61 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 1.6.1 — 2026-10-21
+
+### Actualizar desde 1.6.0
+
+Trae esta version. No cambia una sola linea de codigo: cambia lo que podes hacer con el.
+
+### Cambiado
+
+- **Builder CRM pasa a ser open source con licencia MIT.** Copyright de Diego Vásquez.
+  Cualquiera puede usarlo, copiarlo, modificarlo, desplegar instancias para sus clientes
+  y cobrar por eso, sin ser miembro de ninguna comunidad y sin pedir permiso. La unica
+  condicion es conservar el aviso de copyright. El repositorio queda publico.
+- Lo que esto reemplaza: la licencia propietaria de 1.3.6, que limitaba el despliegue
+  para clientes a los miembros de IA Builder Lab. Esa restriccion ya no existe. Las
+  instancias que ya estaban desplegadas no requieren ninguna accion.
+- `LICENSE` es ahora el texto canonico de la MIT, sin agregados, para que se reconozca
+  automaticamente. El aviso de copyright de auto-crm y la aclaracion sobre las
+  dependencias de npm se mudaron a `NOTICE`, que es donde van los avisos de terceros.
+- `package.json` declara `"license": "MIT"` en lugar de `UNLICENSED`.
+- El README se presenta para quien llega sin conocer la comunidad: la primera linea dice
+  que es el CRM, y el segundo parrafo que es MIT y que no hace falta ser miembro.
+
+## 1.6.0 — 2026-10-12
+
+### Actualizar desde 1.5.1
+
+Trae esta version y agrega `zonaHoraria` a `config/cliente.ts` con la zona del negocio
+(`America/Santiago`, `America/Mexico_City`, `Europe/Madrid`...). Si no la agregas, la
+instancia sigue en UTC y se comporta como antes, asi que actualizar no rompe nada; pero
+mientras este en UTC el agente va a nombrar mal el dia de noche.
+
+### Arreglado
+
+- **El agente nombraba el dia equivocado.** El prompt incluye la fecha de hoy, y se
+  calculaba con la zona del proceso. El contenedor corre en UTC a proposito (una imagen
+  compartida por muchas instancias no puede traer la zona horneada), asi que en Chile,
+  desde las 21:00 hasta la medianoche, el agente creia que ya era el dia siguiente: un
+  cliente que escribia a las 22:00 y preguntaba si atendian manana recibia la respuesta
+  corrida un dia. Sin excepcion y sin log, y en la maquina de un miembro chileno no se
+  reproduce. Ahora la fecha se resuelve en `config.zonaHoraria`.
+- **"Hoy" y "Ayer" eran una ventana de 24 horas**, no dias del calendario: a las 00:30,
+  algo de las 23:00 salia como "Hoy". Ahora se comparan dias en la zona configurada, asi
+  que la misma fila no dice una cosa en el servidor y otra en el navegador.
+
+### Agregado
+
+- `zonaHoraria` en `config/cliente.ts`: identificador IANA, validado contra el entorno
+  para que un error de tipeo se rechace al validar en vez de caer lejos. Por defecto
+  `UTC`. Ver `specs/nucleo/11-zona-horaria.md`.
+- `specs/_brief.md`: que preguntarle al cliente antes de empezar una adaptacion. Solo
+  tres respuestas son obligatorias; el resto lo decide Claude y lo informa al entregar.
+  Es la entrada del paso 1 de `adaptar-a-cliente`.
+- Cinco casos nuevos en `tests/`. La suite se corre tambien con el proceso en UTC
+  (`TZ=UTC npm test`), que es la unica forma de ver el bug de la fecha.
+
 ## 1.5.1 — 2026-10-08
 
 ### Actualizar desde 1.5.0

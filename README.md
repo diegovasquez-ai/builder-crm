@@ -1,9 +1,13 @@
 # Builder CRM
 
-**El CRM multicanal con agente de IA que los miembros de IA Builder Lab entregan a sus
-clientes.** Una bandeja para WhatsApp, Instagram y Messenger, un agente que califica
+**CRM multicanal con agente de IA, hecho para entregarle una instancia propia a cada
+cliente.** Una bandeja para WhatsApp, Instagram y Messenger, un agente que califica
 leads y mueve el pipeline, y un arnes de Claude Code que adapta, despliega y prueba
-una instancia por cliente con un solo prompt.
+una instancia con un solo prompt.
+
+Open source, licencia **MIT**: usalo, modificalo, desplegalo para tus clientes y cobra
+por eso. Nacio dentro de la comunidad IA Builder Lab, que es donde se ensena a usarlo,
+pero no hace falta ser miembro de nada para que sea tuyo.
 
 > *"Adapta Builder CRM para una inmobiliaria llamada Casa Sur, con modulo de
 > propiedades y agendamiento de visitas, y despliegalo en mi Coolify."*
@@ -192,12 +196,13 @@ Cambios por version: [`CHANGELOG.md`](CHANGELOG.md). Secretos, roles y RLS:
 
 ## Licencia
 
-**Propietaria.** Copyright (c) 2026 Diego Vásquez. Los miembros de IA Builder Lab
-pueden adaptarlo, desplegar instancias para sus clientes y cobrar por ellas; no
-pueden publicar el codigo ni redistribuirlo como plantilla o producto. Los terminos
-completos estan en [`LICENSE`](LICENSE).
+**MIT.** Copyright (c) 2026 Diego Vásquez. Podes usarlo, copiarlo, modificarlo,
+desplegarlo para tus clientes, cobrar por eso y distribuirlo. La unica condicion es
+conservar el aviso de copyright. Sin garantia: quien despliega una instancia es
+responsable de sus datos, de sus credenciales y de lo que el agente le responda a las
+personas que escriben. El texto completo esta en [`LICENSE`](LICENSE).
 
-Nacio como fork de [auto-crm](https://github.com/Hainrixz/auto-crm), cuya licencia
-MIT se conserva en `LICENSE` para las partes que vienen de ahi. La arquitectura de
-entrega para agencias toma ideas de
+Nacio como fork de [auto-crm](https://github.com/Hainrixz/auto-crm), tambien MIT; su
+aviso de copyright se conserva en [`NOTICE`](NOTICE), junto con el de las dependencias.
+La arquitectura de entrega para agencias toma ideas de
 [vocero-crm](https://github.com/kevinrivm/vocero-crm).
