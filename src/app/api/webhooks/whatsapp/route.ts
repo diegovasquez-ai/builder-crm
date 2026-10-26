@@ -415,6 +415,14 @@ export async function POST(request: NextRequest) {
         new Set(enqueuedJobs.map((j) => j.jobId))
       );
       const baseUrl = getWorkerBaseUrl(request);
+      // Vacio = falta APP_BASE_URL en produccion. No se dispara: mandar el secreto a un
+      // host sacado de la cabecera seria entregarselo a quien la puso. Lo levanta el barrido.
+      if (!baseUrl) {
+        console.error(
+          `[meta-webhook] sin APP_BASE_URL no se dispara el worker; quedan ${uniqueJobIds.length} en cola`
+        );
+        return;
+      }
       const secret = process.env.AGENT_WORKER_SECRET;
 
       await Promise.all(
@@ -448,13 +456,30 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ received: true });
 }
 
-function getWorkerBaseUrl(request: NextRequest): string {
+/**
+ * URL publica de la app para que el webhook pueda llamarse a si mismo.
+ *
+ * A esta URL se le manda AGENT_WORKER_SECRET en una cabecera, asi que NO puede salir de
+ * la peticion entrante: quien controle el `Host` de una peticion que llegue hasta aca se
+ * lleva el secreto a su propio servidor. Hoy el camino esta detras de la firma HMAC del
+ * webhook, pero eso es una defensa de otro, no de esta funcion.
+ *
+ * En produccion se exige APP_BASE_URL (o NEXT_PUBLIC_APP_URL). Si falta, se devuelve
+ * cadena vacia y quien llama no dispara nada: el agente queda sin procesar y queda dicho
+ * en el log, que es preferible a filtrar el secreto. Fuera de produccion se cae a
+ * localhost, que es donde corre `npm run dev`.
+ */
+function getWorkerBaseUrl(_request?: NextRequest): string {
   const fromEnv = process.env.APP_BASE_URL || process.env.NEXT_PUBLIC_APP_URL;
   if (fromEnv) return fromEnv.replace(/\/$/, "");
 
-  const host = request.headers.get("host");
-  const proto = request.headers.get("x-forwarded-proto") ?? "https";
-  if (host) return `${proto}://${host}`;
+  if (process.env.NODE_ENV === "production") {
+    console.error(
+      "[seguridad] falta APP_BASE_URL: no se llama al worker del agente. " +
+        "Derivar la URL del host de la peticion filtraria AGENT_WORKER_SECRET."
+    );
+    return "";
+  }
 
   return "http://localhost:3000";
 }

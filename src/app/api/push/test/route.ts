@@ -18,8 +18,11 @@ export async function POST() {
     });
     return NextResponse.json(outcome);
   } catch (err) {
+    // El mensaje del proveedor de push puede traer detalles internos (endpoints,
+    // claves parciales): queda en el log del servidor y afuera va algo generico.
+    console.error("[push] fallo la notificacion de prueba:", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Error enviando" },
+      { error: "No se pudo enviar la notificacion de prueba" },
       { status: 500 }
     );
   }

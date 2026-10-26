@@ -4,6 +4,28 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 2.0.1 — 2026-10-26
+
+### Actualizar desde 2.0.0
+
+Trae esta version. Si ya tenias `APP_BASE_URL` definida (la skill de deploy la pide), no
+hay nada que hacer.
+
+### Seguridad
+
+- **El secreto del worker podia irse a un servidor ajeno.** Cuando faltaba `APP_BASE_URL`,
+  la URL a la que el CRM se llama a si mismo se armaba con el `Host` y el
+  `X-Forwarded-Proto` de la peticion entrante, y a esa URL se le manda `AGENT_WORKER_SECRET`
+  en una cabecera: quien pudiera poner el `Host` se llevaba el secreto a su propio
+  servidor. Estaba detras de la firma HMAC del webhook, pero eso es una defensa de otro,
+  no de esa funcion. Ahora, en produccion, sin `APP_BASE_URL` no se dispara nada: queda
+  dicho en el log y los trabajos los levanta el barrido. Pasaba en los dos caminos
+  (`src/lib/agent/trigger.ts` y el webhook de Meta).
+- **Dos rutas devolvian el mensaje interno del error al cliente** (`/api/push/test` y
+  `/api/seed/demo`): un error de Postgres trae nombres de tablas y restricciones, y uno
+  del proveedor de push puede traer endpoints. Ahora va un mensaje generico y el detalle
+  queda en el log del servidor.
+
 ## 2.0.0 — 2026-10-26
 
 Version de seguridad. Sale de revisar contra Builder CRM un informe hecho sobre **otro

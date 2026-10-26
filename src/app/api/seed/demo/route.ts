@@ -27,6 +27,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, ...resultado });
   } catch (err) {
     console.error("[seed] fallo:", err);
-    return NextResponse.json({ ok: false, error: err instanceof Error ? err.message : "error" }, { status: 500 });
+    // Un error de Postgres trae nombres de tablas y restricciones: no sale de aca.
+    console.error("[seed] fallo cargando la demo:", err);
+    return NextResponse.json({ ok: false, error: "No se pudieron cargar los datos demo" }, { status: 500 });
   }
 }
