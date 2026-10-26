@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { claimAgentJob, markJobDone, markJobFailed, findStaleJobs } from "@/lib/agent/queue";
 import { runAgentForContact, runAgentForConversation } from "@/lib/agent";
+import { autorizadoPorSecreto } from "@/lib/secreto-worker";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -12,14 +13,13 @@ export const maxDuration = 60;
  * - El webhook de WhatsApp via `after()` con setTimeout (debounce)
  * - Un cron periodico (que llama GET y barre jobs stale)
  *
- * Auth: header `x-agent-secret` debe matchear AGENT_WORKER_SECRET.
+ * Auth: `x-agent-secret` (o Bearer) debe coincidir con AGENT_WORKER_SECRET. Sin esa
+ * variable NO se atiende a nadie: la ruta es publica en el middleware y el secreto es
+ * lo unico que la protege.
  */
 export async function POST(request: NextRequest) {
-  const secret = process.env.AGENT_WORKER_SECRET;
-  if (secret) {
-    if (request.headers.get("x-agent-secret") !== secret) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  if (!autorizadoPorSecreto(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   let body: { jobId?: string };
@@ -40,13 +40,8 @@ export async function POST(request: NextRequest) {
  * GET = scan de jobs stale (cron). Procesa hasta 5 en serie.
  */
 export async function GET(request: NextRequest) {
-  const secret = process.env.AGENT_WORKER_SECRET;
-  if (secret) {
-    const authHeader = request.headers.get("authorization");
-    const provided = authHeader?.replace(/^Bearer\s+/i, "") ?? request.headers.get("x-agent-secret");
-    if (provided !== secret) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  if (!autorizadoPorSecreto(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const stale = await findStaleJobs();

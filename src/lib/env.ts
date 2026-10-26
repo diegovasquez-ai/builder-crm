@@ -37,7 +37,14 @@ export const esquemaEnv = z.object({
   // El servidor de autenticacion tiene SMTP: habilita invitaciones por correo y
   // "olvide mi contrasena". Ver src/lib/auth-correo.ts y docs/CORREO.md.
   AUTH_ENVIA_CORREOS: booleano,
-  AGENT_WORKER_SECRET: opcional,
+  // Obligatoria desde 2.0.0. Protege las rutas internas (`/api/agent/process`, los dos
+  // barridos y la carga de datos demo), que son publicas en el middleware porque las
+  // llama un cron o el propio servidor, sin sesion. Hasta 1.6.1 era opcional y la
+  // comprobacion se SALTABA si faltaba: una instancia sin ella quedaba con esas rutas
+  // abiertas a internet y sin ningun sintoma. Ahora falla cerrada, asi que sin la
+  // variable el agente no corre; es preferible que /api/health se queje a que quede
+  // abierta en silencio. Generar con: openssl rand -hex 32
+  AGENT_WORKER_SECRET: z.string().min(16, "AGENT_WORKER_SECRET es obligatoria (openssl rand -hex 32)"),
   LEADS_WEBHOOK_SECRET: opcional,
   SWEEP_INTERVAL_MIN: z.preprocess(vacioComoAusente, z.coerce.number().int().min(1).optional()),
 
@@ -102,6 +109,8 @@ const NO_HACEN_FALTA_EN_LOCAL = [
   "DATABASE_URL",
   "NEXT_PUBLIC_SUPABASE_URL",
   "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+  // En modo local no hay cron ni internet: las rutas internas no estan expuestas.
+  "AGENT_WORKER_SECRET",
 ];
 
 export function envFaltantes(): string[] {

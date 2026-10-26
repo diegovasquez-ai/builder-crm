@@ -72,6 +72,16 @@ function crearCliente() {
     max: 10,
     idle_timeout: 20,
     connect_timeout: 10,
+    // TLS obligatorio salvo que se diga lo contrario a mano.
+    //
+    // postgres-js deja `ssl` en false si la URL no trae `sslmode`, y ni la que copia y
+    // pega Supabase ni la plantilla de .env.example lo traen: sin esto, cada consulta
+    // (contactos, conversaciones enteras de WhatsApp, telefonos) cruza la red en claro
+    // entre el VPS y la base. No falla nada ni se nota: solo viaja legible.
+    //
+    // `DATABASE_SSL=off` existe para un Postgres en la misma maquina o en la red
+    // interna de Docker, donde no hay certificado y no hay red publica que cruzar.
+    ssl: process.env.DATABASE_SSL === "off" ? false : "require",
   });
 
   return drizzle(client, { schema });

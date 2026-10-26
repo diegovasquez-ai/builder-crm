@@ -21,6 +21,26 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve("."),
   },
+  // Cabeceras de seguridad, solo en produccion (en desarrollo HSTS sobre localhost
+  // obliga a https y rompe `npm run dev`).
+  //
+  // HSTS cierra la ventana de la PRIMERA visita: sin ella, un `http://crm.cliente.com`
+  // escrito a mano sale en claro una vez, y ahi viaja la cookie de sesion. Vercel la
+  // pone sola; un VPS con Coolify no necesariamente.
+  async headers() {
+    if (process.env.NODE_ENV !== "production") return [];
+    return [
+      {
+        source: "/:ruta*",
+        headers: [
+          { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+        ],
+      },
+    ];
+  },
   env: {
     // Version congelada al construir; commit solo si el build lo recibio (SOURCE_COMMIT).
     NEXT_PUBLIC_APP_VERSION: pkg.version,

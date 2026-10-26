@@ -84,8 +84,27 @@ que si se registrara con email. Configuracion y fallos tipicos en
 | `/api/webhooks/zernio` | HMAC SHA-256 del cuerpo con `ZERNIO_WEBHOOK_SECRET` (fail-closed: sin secreto se rechaza todo); idempotencia por id de evento |
 | `/api/webhooks/whatsapp` (Meta directo) | `X-Hub-Signature-256` con `WHATSAPP_APP_SECRET`; verify token del hub |
 | `/api/webhooks/leads` | header `x-webhook-secret` = `LEADS_WEBHOOK_SECRET` |
-| `/api/agent/process`, barridos | `AGENT_WORKER_SECRET` |
+| `/api/agent/process`, barridos, seed demo | `AGENT_WORKER_SECRET` (fail-closed desde 2.0.0: **sin la variable se rechaza todo**), comparado en tiempo constante |
 | `/api/health` | publico, sin datos sensibles (solo nombres de variables faltantes) |
+
+## Transporte y cookies
+
+- **La base va con TLS.** `ssl: "require"` en el driver (`src/db/index.ts`). No alcanza
+  con que la URL de Supabase parezca segura: `postgres-js` deja `ssl` en false si la URL
+  no trae `sslmode`, y la que da el panel no lo trae. `DATABASE_SSL=off` solo para una
+  base sin certificado en la misma maquina o en la red interna de Docker.
+- **La cookie de sesion va `secure`, `httpOnly` y `sameSite: lax`** en produccion
+  (`src/lib/supabase/cookies.ts`), compartida por el middleware y el cliente de servidor.
+  `@supabase/ssr` no pone `secure` por su cuenta.
+- **Cabeceras en produccion**: HSTS (un ano, con subdominios), `X-Content-Type-Options`,
+  `Referrer-Policy` y `X-Frame-Options`, en `next.config.ts`. HSTS importa sobre todo
+  fuera de Vercel: cierra la ventana de la primera visita en claro.
+
+## Dependencias
+
+`npm audit --omit=dev` tiene que dar **0 vulnerabilidades** antes de entregar. El arbol
+de produccion se mantiene chico a proposito: herramientas de linea de comandos como
+`shadcn` van en `devDependencies`, porque si no arrastran su propio arbol a la imagen.
 
 ## Escanear el repo antes de publicarlo
 
@@ -103,12 +122,15 @@ es publica por diseno: lo que protege los datos es RLS mas la autorizacion del s
 
 ## Checklist antes de entregar una instancia
 
-1. `AGENT_WORKER_SECRET`, `LEADS_WEBHOOK_SECRET` y `ZERNIO_WEBHOOK_SECRET` definidos
-   y generados al azar (`openssl rand -hex 32`).
+1. `AGENT_WORKER_SECRET` (obligatoria), `LEADS_WEBHOOK_SECRET` y `ZERNIO_WEBHOOK_SECRET`
+   definidos y generados al azar (`openssl rand -hex 32`). Si falta la primera,
+   `/api/health` responde 503: es el aviso, no un error que convenga saltear.
 2. `ALLOW_PUBLIC_SIGNUP` sin definir o `false`.
 3. La cuenta admin de demo con contrasena generada; pedir al cliente que la cambie.
 4. `get_advisors(security)` limpio.
 5. `.env.local` y `.mcp.json` fuera del repo del cliente (`git status`).
+6. `npm audit --omit=dev` en 0.
+7. `curl -sI https://<dominio>/ | grep -i strict-transport` devuelve la cabecera.
 
 ## Reportar una vulnerabilidad
 

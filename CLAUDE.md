@@ -177,6 +177,23 @@ un segundo. Lo que necesita base o navegador se prueba con `verificar-instancia`
   no hay que marcar ninguna como build. El `Dockerfile` las sigue aceptando como build
   args para plataformas que las hornean. Nada de secretos en el codigo ni en `.mcp.json`
   (solo `.mcp.json.example`).
+- **Las rutas internas fallan CERRADAS y `AGENT_WORKER_SECRET` es obligatoria.**
+  `/api/agent/process`, los dos barridos y el seed demo son publicos en el middleware
+  (los llama un cron o el propio servidor, sin sesion), asi que ese secreto es lo unico
+  que los separa de internet. Hasta 1.6.1 la comprobacion era `if (secret) {...}` y una
+  instancia sin la variable los dejaba abiertos sin ningun sintoma. Guardian unico en
+  `src/lib/secreto-worker.ts`, en tiempo constante. Nunca volver al patron viejo: en
+  modo local la variable no hace falta (no hay cron ni internet) y por eso esta en
+  `NO_HACEN_FALTA_EN_LOCAL`.
+- **TLS y cookies no se heredan de la plataforma.** `postgres-js` deja `ssl` en false si
+  la URL no trae `sslmode` y la de Supabase no lo trae: va `ssl: "require"` en
+  `src/db/index.ts` (`DATABASE_SSL=off` para una base sin certificado). `@supabase/ssr`
+  no pone `secure` en las cookies: va en `src/lib/supabase/cookies.ts`, compartido por
+  middleware y servidor. Las cabeceras (HSTS y companhia) en `next.config.ts`, solo en
+  produccion.
+- **El arbol de produccion se mantiene limpio.** `npm audit --omit=dev` en 0 es parte de
+  entregar. Las herramientas de linea de comandos (shadcn) van en `devDependencies`: en
+  `dependencies` arrastran su propio arbol a la imagen del cliente.
 - **El modo local apaga la autenticacion entera.** `npm run local` levanta un Postgres
   embebido (`.local/db`) y entra sin sesion: quien abre la URL es admin. Por eso tiene
   dos candados y el segundo es el que importa: `MODO_LOCAL=true` (lo pone solo ese

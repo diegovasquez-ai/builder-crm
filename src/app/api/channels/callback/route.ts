@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { upsertZernioAccount } from "@/lib/channels/accounts";
+import { getAccount } from "@/lib/zernio/accounts";
 import { isChannel } from "@/lib/channels/types";
 import { resolveDefaultTenantId } from "@/lib/tenants";
 import { requireMember } from "@/lib/api-auth";
@@ -15,6 +16,12 @@ export const dynamic = "force-dynamic";
  *
  * El webhook `account.connected` guarda lo mismo de forma idempotente: esto es UX para
  * que la cuenta aparezca al instante, no la fuente de verdad.
+ *
+ * Lo que llega en la URL NO se cree: se le pregunta a Zernio por ese `accountId` con la
+ * clave de esta instancia antes de guardarlo. Sin esa comprobacion, un enlace preparado
+ * y abierto por cualquiera del equipo conectaba al CRM una cuenta ajena, porque el
+ * identificador venia del query y nadie verificaba que esa conexion la hubiera iniciado
+ * este CRM. La clave de la API solo ve las cuentas propias, asi que una ajena no existe.
  */
 export async function GET(request: NextRequest) {
   const auth = await requireMember();
@@ -27,17 +34,29 @@ export async function GET(request: NextRequest) {
   let ok = false;
 
   if (isChannel(platform) && accountId) {
-    const tenantId = await resolveDefaultTenantId();
-    if (tenantId) {
-      await upsertZernioAccount({
-        tenantId,
-        platform,
-        zernioAccountId: accountId,
-        zernioProfileId: params.get("profileId"),
-        username,
-        displayName: username,
-      });
-      ok = true;
+    const cuenta = await getAccount(accountId);
+    if (!cuenta.success) {
+      console.warn(
+        `[channels] la vuelta del OAuth trae un accountId que Zernio no reconoce (${accountId}): se ignora`
+      );
+    } else if (cuenta.data.platform !== platform) {
+      console.warn(
+        `[channels] el accountId ${accountId} es de ${cuenta.data.platform}, no de ${platform}: se ignora`
+      );
+    } else {
+      const tenantId = await resolveDefaultTenantId();
+      if (tenantId) {
+        await upsertZernioAccount({
+          tenantId,
+          platform,
+          // Lo que se guarda sale de la respuesta de Zernio, no del query.
+          zernioAccountId: cuenta.data.id,
+          zernioProfileId: cuenta.data.profileId ?? params.get("profileId"),
+          username: cuenta.data.username ?? username,
+          displayName: cuenta.data.displayName ?? cuenta.data.name ?? username,
+        });
+        ok = true;
+      }
     }
   }
 

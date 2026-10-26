@@ -4,6 +4,83 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 2.0.0 — 2026-10-26
+
+Version de seguridad. Sale de revisar contra Builder CRM un informe hecho sobre **otro
+producto** de la misma familia (CRM Prime): de nueve hallazgos, cuatro aplicaban tambien
+aca. Los otros cinco ya estaban cubiertos (la autorizacion por `team_members`, el
+middleware, el digest que no existe).
+
+### Actualizar desde 1.6.x — HAY QUE HACER UNA COSA A MANO
+
+**`AGENT_WORKER_SECRET` pasa a ser obligatoria.** Si tu instancia ya la tiene, no hay
+nada que hacer. Si no:
+
+```bash
+openssl rand -hex 32
+```
+
+y cargala en las variables de la aplicacion antes de redesplegar. Sin ella, `/api/health`
+responde 503 y el agente no procesa nada: es a proposito, porque la alternativa era
+seguir con las rutas internas abiertas.
+
+Si tu base no acepta TLS (un Postgres en la misma maquina, o en la red interna de
+Docker), agrega tambien `DATABASE_SSL=off`. Supabase, tanto cloud como autoalojado con
+dominio, acepta TLS y no necesita nada.
+
+### Seguridad
+
+- **Las rutas internas fallaban ABIERTAS sin `AGENT_WORKER_SECRET`.** `/api/agent/process`
+  (POST y GET), el barrido de automatizaciones y el barrido de webhooks colgados hacian
+  `if (secret) { ...comprobar... }`: sin la variable no comprobaban nada. Esas rutas son
+  publicas en el middleware a proposito, porque las llama un cron o el propio servidor sin
+  sesion, asi que en una instancia sin la variable cualquiera en internet podia ejecutar
+  trabajos del agente, relanzar eventos de webhook y sembrar datos. No habia ningun
+  sintoma: el CRM funcionaba igual. Ahora hay un unico guardian (`src/lib/secreto-worker.ts`)
+  que falla cerrado y compara en tiempo constante, con tests.
+- **La conexion a Postgres iba sin TLS.** `postgres-js` deja `ssl` en false si la URL no
+  trae `sslmode`, y ni la que copia y pega Supabase ni la plantilla de `.env.example` lo
+  traian: cada consulta (contactos, conversaciones enteras, telefonos) cruzaba la red en
+  claro. Ahora `ssl: "require"`, con `DATABASE_SSL=off` para una base sin certificado en
+  la misma maquina.
+- **Las cookies de sesion iban sin `Secure`.** `@supabase/ssr` no lo pone por defecto y el
+  CRM no pasaba `cookieOptions`, asi que el navegador adjuntaba el JWT de acceso y el token
+  de refresco a cualquier peticion `http://` al dominio. Ahora van `secure` (en produccion),
+  `httpOnly`, `sameSite: lax`, compartidas por el middleware y el cliente de servidor para
+  que no se desincronicen, y con test.
+- **Cabeceras de seguridad en produccion**: `Strict-Transport-Security`,
+  `X-Content-Type-Options`, `Referrer-Policy` y `X-Frame-Options`. HSTS cierra la ventana
+  de la primera visita en claro, que en Vercel cubre la plataforma y en un VPS con Coolify
+  no necesariamente.
+- **La vuelta del OAuth de canales se creia la URL.** Guardaba el `accountId` del query sin
+  comprobar que esa conexion la hubiera iniciado este CRM: un enlace preparado y abierto
+  por alguien del equipo conectaba una cuenta ajena. Ahora se le pregunta a Zernio por esa
+  cuenta con la clave de la instancia (que solo ve las propias) y lo que se guarda sale de
+  la respuesta, no del query.
+
+### Deuda que queda anotada
+
+- Actualizar `eslint-config-next` activo `react-hooks/set-state-in-effect`, que en 16.2.2
+  no corria, y marca **9 sitios que ya existian**: componentes que cargan datos con
+  `useEffect(() => { load() }, [load])` donde `load` toca el estado antes del primer
+  `await`, lo que provoca renders en cascada al montar. No es un fallo de correccion ni de
+  seguridad. Queda como aviso (no error) y a la vista en cada `npm run lint`: arreglarlo
+  bien es reestructurar la carga de datos de nueve componentes y hay que recorrer cada
+  pantalla para comprobar los estados de carga, cosa que no entra en una version de
+  seguridad. Estan listados en `eslint.config.mjs`.
+
+### Dependencias
+
+- De **22 vulnerabilidades en produccion (2 criticas, 13 altas) a 0**. Next pasa a 16.4.3
+  (la serie 16.2.2 acumulaba ejecucion remota de codigo en la optimizacion de imagenes, en
+  `next/og` y en `use cache`, SSRF en Server Actions y un bypass del middleware por rutas
+  de prefetch), y `zod` a 4.6.7.
+- **`shadcn` sale de `dependencies`**: es la herramienta de linea de comandos para agregar
+  componentes, no se importa en ejecucion, y arrastraba 20 avisos al arbol de produccion.
+  Queda en `devDependencies`.
+- **`@anthropic-ai/sdk` se elimina**: no lo usaba ni una linea del codigo. Era un resto del
+  proyecto del que nacio este.
+
 ## 1.6.1 — 2026-10-21
 
 ### Actualizar desde 1.6.0

@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { webhookEvents } from "@/db/schema";
 import { and, asc, eq, lt } from "drizzle-orm";
 import type { Conector } from "./conector";
+import { autorizadoPorSecreto } from "@/lib/secreto-worker";
 
 /**
  * Mecanica generica de webhooks para cualquier conector:
@@ -111,16 +112,11 @@ export async function barrerWebhook(conector: Conector, request: NextRequest): P
 
 /**
  * Los crons de Vercel solo mandan `Authorization: Bearer`; el worker del agente acepta
- * tambien `x-agent-secret`. Sin AGENT_WORKER_SECRET configurado el barrido queda abierto
- * (no recomendado en produccion; .env.example lo explica).
+ * tambien `x-agent-secret`. Sin AGENT_WORKER_SECRET configurado NO se atiende: esta
+ * ruta es publica en el middleware y el secreto es lo unico que la protege.
  */
-export function autorizadoPorSecreto(request: NextRequest): boolean {
-  const secret = process.env.AGENT_WORKER_SECRET;
-  if (!secret) return true;
-  const authHeader = request.headers.get("authorization");
-  const provided = authHeader?.replace(/^Bearer\s+/i, "") ?? request.headers.get("x-agent-secret");
-  return provided === secret;
-}
+// Se re-exporta para no romper a quien ya lo importaba desde aca.
+export { autorizadoPorSecreto };
 
 async function ejecutarEvento(conector: Conector, eventId: string, payload: unknown, headers: Headers): Promise<void> {
   try {

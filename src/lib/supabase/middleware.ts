@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { modoLocal } from "@/lib/modo-local";
+import { opcionesDeCookie } from "@/lib/supabase/cookies";
 
 // `/correo` sirve las plantillas de los correos de acceso: las descarga el servidor de
 // autenticacion, que no tiene sesion en el CRM. Son plantillas vacias, sin datos.
@@ -30,6 +31,7 @@ export async function updateSession(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      cookieOptions: opcionesDeCookie(),
       cookies: {
         getAll() {
           return request.cookies.getAll();

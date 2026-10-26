@@ -117,7 +117,7 @@ de Coolify v4 es de solo lectura) o la **REST API** con `curl`
 
    `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL`,
    `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `DATABASE_URL`, `DIRECT_URL`,
-   `SUPABASE_SERVICE_ROLE_KEY`, `APP_BASE_URL`, `AGENT_WORKER_SECRET`,
+   `SUPABASE_SERVICE_ROLE_KEY`, `APP_BASE_URL`, `AGENT_WORKER_SECRET` (**obligatoria**: sin ella /api/health da 503 y el agente no corre),
    `LEADS_WEBHOOK_SECRET`, `OPENROUTER_API_KEY`, `AGENT_MODEL` (opcional),
    `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, y las de Zernio/S3 si ya existen. Lista
    completa y explicada en `.env.example`.
