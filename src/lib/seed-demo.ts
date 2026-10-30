@@ -11,12 +11,12 @@ import {
   teamMembers,
 } from "@/db/schema";
 import { asc, eq, sql } from "drizzle-orm";
-import { camposContacto } from "@/lib/config";
+import { camposContacto, getConfig } from "@/lib/config";
 import { setDealStage } from "@/lib/deals/stage";
 import { ingestMessage, linkExtraIdentity, upsertConversation } from "@/lib/channels/ingest";
 import { resolveDefaultTenantId } from "@/lib/tenants";
 import { modulosActivos } from "@/lib/modules";
-import type { CampoConfig } from "@/lib/config/schema";
+import type { CampoConfig, GuionDemo } from "@/lib/config/schema";
 import type { ValoresCampos } from "@/lib/config/campos";
 
 /**
@@ -49,7 +49,19 @@ const PERSONAS = [
   { name: "Diego Contreras", email: "diego.contreras@ejemplo.com", phone: "+56 9 7000 0012", company: "Contreras SpA", source: "whatsapp" },
 ];
 
-const ZONAS = ["Providencia", "Las Condes", "Nunoa", "La Reina", "Vitacura", "Santiago Centro", "Maipu", "Colina"];
+/**
+ * Valores de relleno para los campos de texto del contacto. Genericos a proposito: el
+ * nicho los aporta en `config.demo.valoresTexto` (la plantilla de inmobiliaria pone
+ * comunas, una clinica pondria especialidades). Hasta 2.0.1 aca habia comunas de
+ * Santiago escritas a mano, asi que adaptar el CRM a otro rubro obligaba a editar el
+ * nucleo.
+ */
+const VALORES_TEXTO_GENERICOS = ["Centro", "Norte", "Sur", "Oriente", "Poniente", "Zona 1", "Zona 2", "Zona 3"];
+
+function valoresTexto(): string[] {
+  const deLaConfig = getConfig().demo?.valoresTexto;
+  return deLaConfig?.length ? deLaConfig : VALORES_TEXTO_GENERICOS;
+}
 
 /** Valor plausible para cada campo segun su tipo (misma demo para cualquier plantilla). */
 function valorDemo(campo: CampoConfig, i: number): ValoresCampos[string] {
@@ -65,46 +77,61 @@ function valorDemo(campo: CampoConfig, i: number): ValoresCampos[string] {
     case "fecha":
       return new Date(Date.now() + ((i % 10) + 1) * 86_400_000).toISOString().slice(0, 10);
     default:
-      return ZONAS[i % ZONAS.length];
+      const valores = valoresTexto();
+      return valores[i % valores.length];
   }
 }
 
-const GUIONES: Array<Array<{ dir: "in" | "out"; origen?: "agent" | "human"; body: string }>> = [
+/**
+ * Conversaciones de ejemplo para la bandeja, GENERICAS: sirven para cualquier rubro.
+ *
+ * Son las que se ven si `config.demo.conversaciones` no esta definido. Un nicho pone
+ * las suyas ahi (ver `config/plantillas/inmobiliaria.ts`) y estas no se usan. Cubren lo
+ * que hay que mostrar en una demostracion: el agente califica, responde un precio,
+ * agenda, y en una deriva a una persona del equipo.
+ */
+const GUIONES_GENERICOS: GuionDemo[] = [
   [
     { dir: "in", body: "Hola! Vi una publicacion de ustedes y quiero mas informacion." },
-    { dir: "out", origen: "agent", body: "Hola! Con gusto. Para orientarte mejor, que estas buscando y en que zona?" },
-    { dir: "in", body: "Algo de 2 dormitorios, por Providencia o Nunoa, hasta 150 mil." },
-    { dir: "out", origen: "agent", body: "Perfecto, tengo un par de opciones que calzan. Te las paso y si te interesa alguna coordinamos una visita." },
+    { dir: "out", origen: "agent", body: "Hola! Con gusto. Para orientarte mejor, que estas necesitando?" },
+    { dir: "in", body: "Queria saber que ofrecen y cuanto sale." },
+    { dir: "out", origen: "agent", body: "Te paso las opciones y los valores. Si alguna te sirve, coordinamos." },
     { dir: "in", body: "Dale, mandame." },
   ],
   [
-    { dir: "in", body: "Buenas, cuanto sale el arriendo de la oficina que publicaron?" },
-    { dir: "out", origen: "agent", body: "Hola! La oficina de Apoquindo esta en USD 900 mensuales, 45 m2 habilitados. Te sirve ese tamano?" },
-    { dir: "in", body: "Si, me gustaria verla esta semana." },
+    { dir: "in", body: "Buenas, cuanto cuesta lo que publicaron?" },
+    { dir: "out", origen: "agent", body: "Hola! Depende de lo que necesites. Me contas un poco mas y te paso el valor exacto?" },
+    { dir: "in", body: "Si, y me gustaria coordinar esta semana." },
     { dir: "out", origen: "human", body: "Hola, soy del equipo. Te propongo jueves 11:00 o viernes 16:00, cual te acomoda?" },
   ],
   [
-    { dir: "in", body: "Hola, estoy buscando casa con patio para mi familia." },
-    { dir: "out", origen: "agent", body: "Que bueno! Cuantos dormitorios necesitan y en que zona les gustaria vivir?" },
-    { dir: "in", body: "Minimo 3, idealmente La Reina o Penalolen." },
+    { dir: "in", body: "Hola, me recomendaron ustedes y queria consultar." },
+    { dir: "out", origen: "agent", body: "Que bueno! Contame que necesitas y lo vemos." },
+    { dir: "in", body: "Es para la semana que viene, todavia no tengo dia fijo." },
   ],
   [
-    { dir: "in", body: "Me interesa invertir en algo chico para arrendar, que tienen?" },
-    { dir: "out", origen: "agent", body: "Tengo un 1 dormitorio en Nunoa, edificio nuevo, en USD 95.000. Te paso el detalle?" },
-    { dir: "in", body: "Si por favor, y si acepta credito." },
-    { dir: "out", origen: "agent", body: "Es apto credito. Te dejo el link y, si quieres, agendamos una visita." },
+    { dir: "in", body: "Me interesa, pero antes quiero saber como funciona." },
+    { dir: "out", origen: "agent", body: "Te explico en dos lineas y si te hace sentido seguimos. Te sirve?" },
+    { dir: "in", body: "Si por favor." },
+    { dir: "out", origen: "agent", body: "Listo, te dejo el detalle y cualquier duda me escribis." },
   ],
   [
-    { dir: "in", body: "Hola, necesito hablar con una persona, tengo dudas de financiamiento." },
+    { dir: "in", body: "Hola, necesito hablar con una persona, tengo dudas." },
     { dir: "out", origen: "agent", body: "Te paso con una persona del equipo que te va a ayudar con esto. En un momento te escribe." },
     { dir: "out", origen: "human", body: "Hola, soy Ana del equipo. Cuentame que dudas tienes y lo vemos juntos." },
   ],
   [
-    { dir: "in", body: "Quiero arrendar una casa en Vitacura, 3 dormitorios." },
-    { dir: "out", origen: "agent", body: "Tengo una casa de un piso con jardin en Vitacura por USD 2.400. Te gustaria visitarla?" },
-    { dir: "in", body: "Si, el sabado en la manana puedo." },
+    { dir: "in", body: "Quiero avanzar, que necesitan de mi parte?" },
+    { dir: "out", origen: "agent", body: "Perfecto. Con un par de datos lo dejamos coordinado. Que dia te queda comodo?" },
+    { dir: "in", body: "El sabado en la manana puedo." },
   ],
 ];
+
+/** Los del nicho si la config los trae; si no, los genericos. */
+function guiones(): GuionDemo[] {
+  const deLaConfig = getConfig().demo?.conversaciones;
+  return deLaConfig?.length ? deLaConfig : GUIONES_GENERICOS;
+}
 
 export interface ResultadoSeed {
   yaExistia: boolean;
@@ -221,9 +248,12 @@ async function sembrarNucleo(r: ResultadoSeed) {
 
   // Conversaciones por el simulador: se pueden responder y el agente contesta.
   const canales = ["whatsapp", "instagram", "whatsapp", "facebook", "whatsapp", "instagram"] as const;
-  for (let i = 0; i < GUIONES.length && i < creados.length; i++) {
+  // La lista de canales se recorre en ciclo: un nicho puede traer mas o menos
+  // conversaciones que las seis genericas y `canales[i]` quedaria indefinido.
+  const listaGuiones = guiones();
+  for (let i = 0; i < listaGuiones.length && i < creados.length; i++) {
     const contacto = creados[i];
-    const canal = canales[i];
+    const canal = canales[i % canales.length];
     const externalId = `demo:${contacto.id}`;
     await linkExtraIdentity(contacto.id, canal, externalId, null);
     const conv = await upsertConversation({
@@ -241,7 +271,7 @@ async function sembrarNucleo(r: ResultadoSeed) {
     r.conversaciones++;
 
     const base = ahora - (i + 1) * dia;
-    const guion = GUIONES[i];
+    const guion = listaGuiones[i];
     for (let k = 0; k < guion.length; k++) {
       const m = guion[k];
       const sentAt = new Date(base + k * 7 * 60_000);

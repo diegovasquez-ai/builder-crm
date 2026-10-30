@@ -108,6 +108,60 @@ Sos {{agente}}, parte del equipo de {{negocio}}. Atendes por {{canal}} a persona
 - Despues de usar una herramienta, integras la informacion en tu respuesta; nunca copias el JSON.`,
   },
 
+  /**
+   * Datos de demostracion del rubro. Hasta 2.0.1 esto estaba escrito a mano dentro de
+   * `src/lib/seed-demo.ts`, asi que adaptar el CRM a otro rubro obligaba a tocar el
+   * nucleo. Ahora cada plantilla trae los suyos y el nucleo carga genericos.
+   */
+  demo: {
+    valoresTexto: [
+      "Providencia",
+      "Las Condes",
+      "Nunoa",
+      "La Reina",
+      "Vitacura",
+      "Santiago Centro",
+      "Maipu",
+      "Colina",
+    ],
+    conversaciones: [
+      [
+        { dir: "in", body: "Hola! Vi una publicacion de ustedes y quiero mas informacion." },
+        { dir: "out", origen: "agent", body: "Hola! Con gusto. Para orientarte mejor, que estas buscando y en que zona?" },
+        { dir: "in", body: "Algo de 2 dormitorios, por Providencia o Nunoa, hasta 150 mil." },
+        { dir: "out", origen: "agent", body: "Perfecto, tengo un par de opciones que calzan. Te las paso y si te interesa alguna coordinamos una visita." },
+        { dir: "in", body: "Dale, mandame." },
+      ],
+      [
+        { dir: "in", body: "Buenas, cuanto sale el arriendo de la oficina que publicaron?" },
+        { dir: "out", origen: "agent", body: "Hola! La oficina de Apoquindo esta en USD 900 mensuales, 45 m2 habilitados. Te sirve ese tamano?" },
+        { dir: "in", body: "Si, me gustaria verla esta semana." },
+        { dir: "out", origen: "human", body: "Hola, soy del equipo. Te propongo jueves 11:00 o viernes 16:00, cual te acomoda?" },
+      ],
+      [
+        { dir: "in", body: "Hola, estoy buscando casa con patio para mi familia." },
+        { dir: "out", origen: "agent", body: "Que bueno! Cuantos dormitorios necesitan y en que zona les gustaria vivir?" },
+        { dir: "in", body: "Minimo 3, idealmente La Reina o Penalolen." },
+      ],
+      [
+        { dir: "in", body: "Me interesa invertir en algo chico para arrendar, que tienen?" },
+        { dir: "out", origen: "agent", body: "Tengo un 1 dormitorio en Nunoa, edificio nuevo, en USD 95.000. Te paso el detalle?" },
+        { dir: "in", body: "Si por favor, y si acepta credito." },
+        { dir: "out", origen: "agent", body: "Es apto credito. Te dejo el link y, si quieres, agendamos una visita." },
+      ],
+      [
+        { dir: "in", body: "Hola, necesito hablar con una persona, tengo dudas de financiamiento." },
+        { dir: "out", origen: "agent", body: "Te paso con una persona del equipo que te va a ayudar con esto. En un momento te escribe." },
+        { dir: "out", origen: "human", body: "Hola, soy Ana del equipo. Cuentame que dudas tienes y lo vemos juntos." },
+      ],
+      [
+        { dir: "in", body: "Quiero arrendar una casa en Vitacura, 3 dormitorios." },
+        { dir: "out", origen: "agent", body: "Tengo una casa de un piso con jardin en Vitacura por USD 2.400. Te gustaria visitarla?" },
+        { dir: "in", body: "Si, el sabado en la manana puedo." },
+      ],
+    ],
+  },
+
   modulos: {
     nucleo: {
       automatizaciones: true,

@@ -4,6 +4,43 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 2.1.0 — 2026-10-30
+
+### Actualizar desde 2.0.x
+
+Trae esta version. Si usas la plantilla de inmobiliaria, la demo se ve igual que antes.
+Si no la usas, las conversaciones de ejemplo pasan a ser genericas, que es lo correcto.
+
+### Arreglado
+
+- **Los datos demo tenian contenido de inmobiliaria metido en el nucleo.** Las seis
+  conversaciones de la bandeja hablaban de departamentos en Providencia, arriendos en USD
+  y dormitorios, y las zonas de relleno de los campos de texto eran comunas de Santiago,
+  todo escrito a mano en `src/lib/seed-demo.ts`. Adaptar el CRM a otro rubro obligaba a
+  editar el nucleo, que es justo lo que prohibe la constitucion: el criterio de aceptacion
+  dice que un cliente se adapta **sin tocar ningun archivo de `src/`**. Lo descubrio
+  Claude al adaptar el CRM para una clinica: se planto a preguntar que hacer, porque las
+  dos salidas eran malas.
+
+  Ahora el nucleo trae conversaciones **genericas** (el cliente consulta, el agente
+  califica, responde un precio, agenda, y en una deriva a una persona), que sirven para
+  cualquier rubro. El nicho pone las suyas en el bloque nuevo y opcional `demo` de
+  `config/cliente.ts`:
+
+  ```ts
+  demo: {
+    valoresTexto: ["Implantes", "Ortodoncia"],
+    conversaciones: [[{ dir: "in", body: "Hola, quiero una limpieza." }]],
+  }
+  ```
+
+  El contenido inmobiliario volvio a `config/plantillas/inmobiliaria.ts`, que es donde
+  pertenece, asi que esa plantilla se ve exactamente igual que antes.
+- **Un texto del nucleo nombraba el rubro en pantalla.** Ajustes -> Agente decia "no va a
+  poder buscar propiedades, agendar visitas ni derivar" cuando no hay herramientas
+  activas. Un dentista lo leia en su propio CRM. Ahora habla de mover etapas, actualizar
+  la ficha y derivar, que son las herramientas del nucleo.
+
 ## 2.0.1 — 2026-10-26
 
 ### Actualizar desde 2.0.0

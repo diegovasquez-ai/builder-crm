@@ -128,6 +128,41 @@ export const esquemaModulosNucleo = z.object({
   simulador: z.boolean().default(true),
 });
 
+/**
+ * Datos de demostracion del nicho. OPCIONAL: sin esto, la demo del nucleo carga
+ * conversaciones genericas, que sirven para cualquier rubro pero no lucen para ninguno.
+ *
+ * Existe porque los guiones de la bandeja son lo primero que ve un cliente en una
+ * demostracion, y estaban escritos a mano en `src/lib/seed-demo.ts` con contenido de
+ * inmobiliaria. Adaptar el CRM a una clinica obligaba a editar el nucleo, que es
+ * justo lo que la constitucion prohibe.
+ */
+const esquemaDemo = z.object({
+  /**
+   * Conversaciones de ejemplo para la bandeja. Cada una es un ida y vuelta completo:
+   * entra el cliente, contesta el agente, y en alguna interviene una persona del equipo.
+   */
+  conversaciones: z
+    .array(
+      z
+        .array(
+          z.object({
+            dir: z.enum(["in", "out"]),
+            /** Solo para `out`: lo escribio el agente de IA o una persona. */
+            origen: z.enum(["agent", "human"]).optional(),
+            body: z.string().min(1).max(1000),
+          })
+        )
+        .min(1)
+    )
+    .optional(),
+  /**
+   * Valores plausibles para los campos de texto del contacto (zonas, barrios,
+   * especialidades...). Se reparten entre los contactos de ejemplo.
+   */
+  valoresTexto: z.array(z.string().min(1).max(80)).optional(),
+});
+
 export const esquemaConfig = z.object({
   marca: esquemaMarca,
   idioma: z.enum(["es", "en"]).default("es"),
@@ -165,6 +200,8 @@ export const esquemaConfig = z.object({
     nombre: "Asistente",
     mensajeDerivacion: "Te paso con una persona del equipo que te va a ayudar con esto. Un momento.",
   }),
+  /** Datos de demostracion del nicho. Sin esto, la demo del nucleo es generica. */
+  demo: esquemaDemo.optional(),
   /** Funciones del nucleo apagables + modulos de `modules/` por nombre de carpeta. */
   modulos: z
     .object({
@@ -197,6 +234,8 @@ export type ConfigClienteEntrada = z.input<typeof esquemaConfig>;
 export type Marca = z.infer<typeof esquemaMarca>;
 export type EtapaConfig = z.infer<typeof esquemaEtapa>;
 export type CampoConfig = z.infer<typeof esquemaCampo>;
+export type DemoConfig = z.infer<typeof esquemaDemo>;
+export type GuionDemo = NonNullable<DemoConfig["conversaciones"]>[number];
 
 /**
  * Se usa en config/cliente.ts. No valida aqui (lo hace `src/lib/config` una sola vez)

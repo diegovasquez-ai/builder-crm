@@ -114,6 +114,42 @@ describe("esquema de config/cliente.ts", () => {
     }
   });
 
+  it("acepta datos demo del nicho, y son opcionales", () => {
+    // Si este bloque se perdiera, la demo de TODOS los clientes volveria a mostrar
+    // las conversaciones genericas y nadie se enteraria hasta la reunion con el cliente.
+    const sinDemo = esquemaConfig.safeParse(BASE);
+    expect(sinDemo.success).toBe(true);
+    if (sinDemo.success) expect(sinDemo.data.demo).toBeUndefined();
+
+    const conDemo = esquemaConfig.safeParse({
+      ...BASE,
+      demo: {
+        valoresTexto: ["Implantes", "Ortodoncia"],
+        conversaciones: [
+          [
+            { dir: "in", body: "Hola, quiero una limpieza." },
+            { dir: "out", origen: "agent", body: "Hola! Te paso las horas disponibles." },
+          ],
+        ],
+      },
+    });
+    expect(conDemo.success).toBe(true);
+    if (conDemo.success) {
+      expect(conDemo.data.demo?.conversaciones).toHaveLength(1);
+      expect(conDemo.data.demo?.valoresTexto).toContain("Ortodoncia");
+    }
+  });
+
+  it("rechaza una conversacion demo vacia o con direccion invalida", () => {
+    expect(esquemaConfig.safeParse({ ...BASE, demo: { conversaciones: [[]] } }).success).toBe(false);
+    expect(
+      esquemaConfig.safeParse({
+        ...BASE,
+        demo: { conversaciones: [[{ dir: "lateral", body: "x" }]] },
+      }).success
+    ).toBe(false);
+  });
+
   it("explica donde esta el problema, no solo que lo hay", () => {
     const r = esquemaConfig.safeParse({ ...BASE, marca: { nombreCorto: "Norte" } });
     expect(r.success).toBe(false);

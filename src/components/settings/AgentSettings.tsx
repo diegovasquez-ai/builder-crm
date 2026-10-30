@@ -434,8 +434,8 @@ export function AgentSettings() {
         {enabledTools.length === 0 && (
           <p className="text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-md px-3 py-2">
             ⚠ No hay herramientas activas. El agente solo va a poder responder
-            con texto, no va a poder buscar propiedades, agendar visitas ni
-            derivar.
+            con texto: no va a poder mover etapas, actualizar la ficha ni
+            derivar a una persona.
           </p>
         )}
       </div>
