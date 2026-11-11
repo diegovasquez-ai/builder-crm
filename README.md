@@ -1,9 +1,16 @@
 # Builder CRM
 
-**CRM multicanal con agente de IA, hecho para entregarle una instancia propia a cada
-cliente.** Una bandeja para WhatsApp, Instagram y Messenger, un agente que califica
-leads y mueve el pipeline, y un arnes de Claude Code que adapta, despliega y prueba
-una instancia con un solo prompt.
+**Un ARM open source y self-hosted: el CRM agentico que actua en vez de esperar.** Una
+bandeja para WhatsApp, Instagram y Messenger donde el agente de IA no espera a que
+alguien cargue los datos: responde al instante, califica al lead, completa su ficha,
+mueve el pipeline y deriva al asesor cuando le toca. Mas un arnes de Claude Code que
+adapta, despliega y prueba una instancia por cliente con un solo prompt.
+
+**ARM** (Agentic Relationship Management) es el CRM operado por agentes de IA. El CRM
+clasico guarda, organiza y espera a que el vendedor se acuerde; este observa la
+conversacion, decide el siguiente paso dentro de las reglas que le pongas y lo ejecuta
+sobre el CRM. Que hace exactamente el agente, con que herramientas y donde se le ponen
+los limites: [`docs/AGENTE.md`](docs/AGENTE.md).
 
 Open source, licencia **MIT**: usalo, modificalo, desplegalo para tus clientes y cobra
 por eso. Nacio dentro de la comunidad IA Builder Lab, que es donde se ensena a usarlo,

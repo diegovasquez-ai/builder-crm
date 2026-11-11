@@ -4,6 +4,27 @@ Que trae cada version de Builder CRM y que hacer para actualizar. SemVer segun l
 le importa a quien opera una instancia (ver "Versiones" en el [README](README.md)):
 mayor = pasos manuales, menor = funciones nuevas, parche = arreglos.
 
+## 2.1.1 — 2026-11-11
+
+### Actualizar desde 2.1.0
+
+Trae esta version. No cambia una sola linea de codigo: cambia como se presenta.
+
+### Cambiado
+
+- **Builder CRM se presenta como un ARM**, que es como se esta nombrando en el mercado
+  al CRM agentico: el CRM operado por agentes de IA que actuan en vez de esperar a que
+  alguien cargue los datos. Es lo que este CRM ya hacia; lo que cambia es que ahora lo
+  dice. El README abre con eso y explica la sigla, porque la mayoria de quien llega al
+  repositorio no la conoce todavia.
+- La descripcion y los topics del repositorio acompanan: se agregan `arm`,
+  `agentic-crm` y `agentic-ai`.
+- **El nombre del producto no cambia.** El termino es nuevo y todavia no esta asentado
+  (convive con al menos dos significados distintos, uno de ellos sobre hablarle a los
+  asistentes de IA de los clientes, que no es lo que esto hace), y ademas nadie busca
+  software por esa sigla: se busca CRM. Reclamar la categoria en la descripcion cuesta
+  una linea si el termino no prende; renombrar el repositorio no se deshace.
+
 ## 2.1.0 — 2026-10-30
 
 ### Actualizar desde 2.0.x
